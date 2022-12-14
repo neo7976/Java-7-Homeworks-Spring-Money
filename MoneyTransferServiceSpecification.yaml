@@ -1,0 +1,124 @@
+openapi: 3.0.0
+info:
+  title: Transfer Money API
+  description: Transfer Money API
+  version: 1.0.0
+servers:
+  - url: 'http://localhost:8080/transfer'
+    description: local server
+paths:
+  /transfer:
+    post:
+      summary: Transfer money card to card
+      description: Call to send money between cards
+      requestBody:
+        description: Card from and card to
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                cardFromNumber:
+                  type: string
+                cardFromValidTill:
+                  type: string
+                cardFromCVV:
+                  type: string
+                cardToNumber:
+                  type: string
+                amount:
+                  type: object
+                  properties:
+                    value:
+                      type: integer
+                    currency:
+                      type: string
+      responses:
+        '200':
+          description: Success transfer
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  operationId:
+                    type: string
+                    description: Operation id
+        '400':
+          description: Error input data
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    description: Error customer message
+                  id:
+                    type: integer
+        '500':
+          description: Error transfer
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    description: Error customer message
+                  id:
+                    type: integer
+  /confirmOperation:
+    post:
+      summary: Confirm operation
+      description: Confirming operataion with code
+      requestBody:
+        description: Confirm operation
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                operationId:
+                  type: string
+                  description: Operation id
+                code:
+                  type: string
+                  description: Verification code
+      responses:
+        '200':
+          description: Success confirmation
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  operationId:
+                    type: string
+                    description: Operation id
+        '400':
+          description: Error input data
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    description: Error customer message
+                  id:
+                    type: integer
+        '500':
+          description: Error confirmation
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    description: Error customer message
+                  id:
+                    type: integer
