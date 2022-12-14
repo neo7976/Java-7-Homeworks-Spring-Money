@@ -17,12 +17,11 @@ public class Currency {
         this.name = name;
     }
 
-    public int getAmount() {
+    public int getBalance() {
         return balance;
     }
-
-    public void setAmount(int amount) {
-        this.balance = amount;
+    public void setBalance(int balance) {
+        this.balance = balance;
     }
 }
 

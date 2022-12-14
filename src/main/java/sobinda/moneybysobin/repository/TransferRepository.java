@@ -40,10 +40,19 @@ public class TransferRepository {
     public void transferMoneyCardToCard(Card cardFrom, String cardNumberTo, Currency currency) {
         // написать сверку данных по карте из базы, проверка баланса и существование карты приема денег
         // выбрать, что в итоге возвращаем
+
+        //проверяем наличии карт в базе
         if (mapStorage.containsKey(cardFrom.getCardNumber()) && mapStorage.containsKey(cardNumberTo)) {
             //проверяем на совпадаение валюты перевода и валюты на карте
             if (mapStorage.get(cardNumberTo).getCurrency().getName().equals(currency.getName())) {
 
+                //Скорее всего нужно переместить локику в Класс карт на перевод с одной на вторую
+                int balanceFrom = mapStorage.get(cardFrom.getCardNumber()).getCurrency().getBalance();
+                if (balanceFrom >= currency.getBalance()) {
+                    mapStorage.get(cardFrom.getCardNumber()).getCurrency().setBalance(balanceFrom - currency.getBalance());
+                    int balanceTo = mapStorage.get(cardNumberTo).getCurrency().getBalance();
+                    mapStorage.get(cardNumberTo).getCurrency().setBalance(balanceTo + currency.getBalance());
+                }
             }
             // пишем проверку баланса и перевод денег
             // возможно после удачной обработки требуется перекинуть на путь подтверждения операции
@@ -52,5 +61,5 @@ public class TransferRepository {
         // или возвращаем 0 или выполняем условие для выброса ошибки
 
     }
-    //Хранение данных по картам и переводы сумм
+
 }
