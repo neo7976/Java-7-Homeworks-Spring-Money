@@ -2,7 +2,8 @@ package sobinda.moneybysobin.repository;
 
 import org.springframework.stereotype.Repository;
 import sobinda.moneybysobin.model.Card;
-import sobinda.moneybysobin.model.Currency;
+import sobinda.moneybysobin.model.CardTransfer;
+import sobinda.moneybysobin.model.Amount;
 
 import java.util.AbstractMap;
 import java.util.Map;
@@ -21,14 +22,14 @@ public class TransferRepository {
                                     "4558 4458 8558 4747",
                                     "08/23",
                                     "351",
-                                    new Currency("Рубль", 50_000))),
+                                    new Amount(50_000, "RUR"))),
                     new AbstractMap.SimpleEntry<>(
                             "4558 4458 8558 5555",
                             new Card(
                                     "4558 4458 8558 5555",
                                     "08/23",
                                     "352",
-                                    new Currency("Рубль", 25_000)))
+                                    new Amount(25_000, "RUR")))
             )
             .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
 
@@ -37,21 +38,21 @@ public class TransferRepository {
         this.mapStorage = new ConcurrentHashMap<>(map);
     }
 
-    public void transferMoneyCardToCard(Card cardFrom, String cardNumberTo, Currency currency) {
+    public void transferMoneyCardToCard(Card cardFrom, String cardNumberTo, Amount amount) {
         // написать сверку данных по карте из базы, проверка баланса и существование карты приема денег
         // выбрать, что в итоге возвращаем
 
         //проверяем наличии карт в базе
         if (mapStorage.containsKey(cardFrom.getCardNumber()) && mapStorage.containsKey(cardNumberTo)) {
             //проверяем на совпадаение валюты перевода и валюты на карте
-            if (mapStorage.get(cardNumberTo).getCurrency().getName().equals(currency.getName())) {
+            if (mapStorage.get(cardNumberTo).getAmount().getCurrency().equals(amount.getCurrency())) {
 
                 //Скорее всего нужно переместить локику в Класс карт на перевод с одной на вторую
-                int balanceFrom = mapStorage.get(cardFrom.getCardNumber()).getCurrency().getBalance();
-                if (balanceFrom >= currency.getBalance()) {
-                    mapStorage.get(cardFrom.getCardNumber()).getCurrency().setBalance(balanceFrom - currency.getBalance());
-                    int balanceTo = mapStorage.get(cardNumberTo).getCurrency().getBalance();
-                    mapStorage.get(cardNumberTo).getCurrency().setBalance(balanceTo + currency.getBalance());
+                int balanceFrom = mapStorage.get(cardFrom.getCardNumber()).getAmount().getValue();
+                if (balanceFrom >= amount.getValue()) {
+                    mapStorage.get(cardFrom.getCardNumber()).getAmount().setValue(balanceFrom - amount.getValue());
+                    int balanceTo = mapStorage.get(cardNumberTo).getAmount().getValue();
+                    mapStorage.get(cardNumberTo).getAmount().setValue(balanceTo + amount.getValue());
                 }
             }
             // пишем проверку баланса и перевод денег

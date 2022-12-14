@@ -1,34 +1,32 @@
 package sobinda.moneybysobin.model;
 
 import javax.validation.constraints.NotNull;
-import java.util.Map;
 
-public class Card{
-    @NotNull
+public class Card {
+
     private String cardNumber;
-    @NotNull
+
     private String cardValidTill;
-    @NotNull
+
     private String cardCVV;
     //Можно подумать над созданием списка разных валют на 1 карте
-    private Currency currency;
+    private Amount amount;
 
-    public Card(String cardNumber, String cardValidTill, String cardCVV, Currency currency) {
+    public Card(String cardNumber, String cardValidTill, String cardCVV, Amount amount) {
         this.cardNumber = cardNumber;
         this.cardValidTill = cardValidTill;
         this.cardCVV = cardCVV;
-        this.currency = currency;
+        this.amount = amount;
     }
 
-    public Card(String cardNumber) {
+    public Card(String cardNumber, String cardValidTill, String cardCVV) {
         this.cardNumber = cardNumber;
+        this.cardValidTill = cardValidTill;
+        this.cardCVV = cardCVV;
     }
 
     public Card() {
     }
-    //    public Card(String cardNumber) {
-//        this.cardNumber = cardNumber;
-//    }
 
     public String getCardNumber() {
         return cardNumber;
@@ -54,12 +52,12 @@ public class Card{
         this.cardCVV = cardCVV;
     }
 
-    public Currency getCurrency() {
-        return currency;
+    public Amount getAmount() {
+        return amount;
     }
 
-    public void setCurrency(Currency currency) {
-        this.currency = currency;
+    public void setAmount(Amount amount) {
+        this.amount = amount;
     }
 
 

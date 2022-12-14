@@ -5,7 +5,8 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
 import sobinda.moneybysobin.model.Card;
-import sobinda.moneybysobin.model.Currency;
+import sobinda.moneybysobin.model.CardTransfer;
+import sobinda.moneybysobin.model.Amount;
 import sobinda.moneybysobin.service.TransferService;
 
 @RestController
@@ -17,10 +18,10 @@ public class TransferController {
     }
 
     @PostMapping("/transfer")
-    public void transferMoneyCardToCard(@RequestBody @Validated Card cardFrom, @RequestBody @Validated Card cardTo, @RequestBody Currency currency) {
+    public void transferMoneyCardToCard(@RequestBody @Validated CardTransfer cardTransfer) {
         //выбрать расширение и что возвращает при переводе с карты на карту
         //Принимать перевод на карту, возможно, требуется только номер карты и переделать на @RequestParam("cardNumber")
-        transferService.transferMoneyCardToCard(cardFrom, cardTo, currency);
+        transferService.transferMoneyCardToCard(cardTransfer);
     }
 
     @PostMapping("/confirmOperation")
