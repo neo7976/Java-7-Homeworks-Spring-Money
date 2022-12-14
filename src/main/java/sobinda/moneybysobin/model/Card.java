@@ -1,8 +1,9 @@
 package sobinda.moneybysobin.model;
 
 import javax.validation.constraints.NotNull;
+import java.util.Map;
 
-public class Card {
+public class Card{
     @NotNull
     private String cardNumber;
     @NotNull
@@ -18,9 +19,15 @@ public class Card {
         this.currency = currency;
     }
 
-    public Card(String cardNumber) {
+    public Card(String cardNumber, String cardValidTill, String cardCVV) {
         this.cardNumber = cardNumber;
+        this.cardValidTill = cardValidTill;
+        this.cardCVV = cardCVV;
     }
+
+    //    public Card(String cardNumber) {
+//        this.cardNumber = cardNumber;
+//    }
 
     public String getCardNumber() {
         return cardNumber;
@@ -53,4 +60,6 @@ public class Card {
     public void setCurrency(Currency currency) {
         this.currency = currency;
     }
+
+
 }
