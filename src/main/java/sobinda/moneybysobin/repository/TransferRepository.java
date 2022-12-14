@@ -1,9 +1,8 @@
 package sobinda.moneybysobin.repository;
 
 import org.springframework.stereotype.Repository;
-import sobinda.moneybysobin.model.Card;
-import sobinda.moneybysobin.model.CardTransfer;
 import sobinda.moneybysobin.model.Amount;
+import sobinda.moneybysobin.model.Card;
 
 import java.util.AbstractMap;
 import java.util.Map;
@@ -46,13 +45,14 @@ public class TransferRepository {
         if (mapStorage.containsKey(cardFrom.getCardNumber()) && mapStorage.containsKey(cardNumberTo)) {
             //проверяем на совпадаение валюты перевода и валюты на карте
             if (mapStorage.get(cardNumberTo).getAmount().getCurrency().equals(amount.getCurrency())) {
-
-                //Скорее всего нужно переместить локику в Класс карт на перевод с одной на вторую
-                int balanceFrom = mapStorage.get(cardFrom.getCardNumber()).getAmount().getValue();
-                if (balanceFrom >= amount.getValue()) {
-                    mapStorage.get(cardFrom.getCardNumber()).getAmount().setValue(balanceFrom - amount.getValue());
-                    int balanceTo = mapStorage.get(cardNumberTo).getAmount().getValue();
-                    mapStorage.get(cardNumberTo).getAmount().setValue(balanceTo + amount.getValue());
+                if (mapStorage.get(cardFrom.getCardNumber()).equals(cardFrom)) {
+                    //Скорее всего нужно переместить локику в Класс карт на перевод с одной на вторую
+                    int balanceFrom = mapStorage.get(cardFrom.getCardNumber()).getAmount().getValue();
+                    if (balanceFrom >= amount.getValue()) {
+                        mapStorage.get(cardFrom.getCardNumber()).getAmount().setValue(balanceFrom - amount.getValue());
+                        int balanceTo = mapStorage.get(cardNumberTo).getAmount().getValue();
+                        mapStorage.get(cardNumberTo).getAmount().setValue(balanceTo + amount.getValue());
+                    }
                 }
             }
             // пишем проверку баланса и перевод денег

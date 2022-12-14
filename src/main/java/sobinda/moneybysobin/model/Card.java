@@ -1,6 +1,6 @@
 package sobinda.moneybysobin.model;
 
-import javax.validation.constraints.NotNull;
+import java.util.Objects;
 
 public class Card {
 
@@ -60,5 +60,26 @@ public class Card {
         this.amount = amount;
     }
 
+    @Override
+    public String toString() {
+        return String.format("Карта:\nНомер карты:%s\nМЕС/ГОД:%s\nCVV:%s\nБаланс:%s\n",
+                cardNumber,
+                cardValidTill,
+                cardCVV,
+                amount);
+    }
 
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        Card card = (Card) o;
+        return Objects.equals(cardNumber, card.cardNumber) && Objects.equals(cardValidTill, card.cardValidTill) && Objects.equals(cardCVV, card.cardCVV);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(cardNumber, cardValidTill, cardCVV);
+    }
 }

@@ -9,7 +9,6 @@ public class CardTransfer {
     private String cardFromValidTill;
     @NotNull
     private String cardFromCVV;
-    //Можно подумать над созданием списка разных валют на 1 карте
     @NotNull
     private String cardToNumber;
     private Amount amount;

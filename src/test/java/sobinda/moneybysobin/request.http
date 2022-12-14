@@ -8,13 +8,13 @@ Content-Type: application/json
 
 
   {
-    "cardFromNumber": "444",
-    "cardFromValidTill": "44",
-    "cardFromCVV": "44",
-    "cardToNumber": "44",
+    "cardFromNumber": "4558 4458 8558 4747",
+    "cardFromValidTill": "08/23",
+    "cardFromCVV": "351",
+    "cardToNumber": "4558 4458 8558 5555",
     "amount": {
       "value": 500,
-      "currency": "444"
+      "currency": "RUR"
     }
   }
 

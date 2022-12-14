@@ -26,6 +26,11 @@ public class Amount {
     public void setValue(int value) {
         this.value = value;
     }
+
+    @Override
+    public String toString() {
+        return String.format("[%d %s]", value, currency);
+    }
 }
 
 
