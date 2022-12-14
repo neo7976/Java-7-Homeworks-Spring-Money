@@ -30,6 +30,7 @@ public class TransferLog {
         return INSTANCE;
     }
 
+    //Попробовать создать статичный класс и в него передавать параметры, а через него в log
     public String log(String cardNumberFrom, String cardNumberTo, Amount amount, Amount commission, String result) {
         cardTransactions.put(cardNumberFrom, cardTransactions.getOrDefault(cardNumberFrom, 0) + 1);
         String s = String.format(
@@ -49,6 +50,31 @@ public class TransferLog {
                 amount,
                 commission,
                 result
+        );
+        writeLog(s);
+        return s;
+    }
+
+
+    public String log(LogBuilder logBuilder) {
+        cardTransactions.put(logBuilder.getCardNumberFrom(), cardTransactions.getOrDefault(logBuilder.getCardNumberFrom(), 0) + 1);
+        String s = String.format(
+                "[%s]\n" +
+                        "Операция в системе: №%d\n" +
+                        "Операция по карте: №%d\n" +
+                        "Номер карты списания: %s\n" +
+                        "Номер карты зачисления: %s\n" +
+                        "Сумма списания: %s\n" +
+                        "Комиссия за перевод: %s\n" +
+                        "Результат операции: %s\n\n",
+                dtf.format(LocalDateTime.now()),
+                num.incrementAndGet(),
+                cardTransactions.get(logBuilder.getCardNumberFrom()),
+                logBuilder.getCardNumberFrom(),
+                logBuilder.getCardNumberTo(),
+                logBuilder.getAmount(),
+                logBuilder.getCommission(),
+                logBuilder.getResult()
         );
         writeLog(s);
         return s;

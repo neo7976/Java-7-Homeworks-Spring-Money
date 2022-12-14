@@ -1,6 +1,8 @@
 package sobinda.moneybysobin.repository;
 
 import org.springframework.stereotype.Repository;
+import sobinda.moneybysobin.log.LogBuilder;
+import sobinda.moneybysobin.log.TransferLog;
 import sobinda.moneybysobin.model.Amount;
 import sobinda.moneybysobin.model.Card;
 
@@ -12,6 +14,7 @@ import java.util.stream.Stream;
 
 @Repository
 public class TransferRepository {
+    TransferLog transferLog;
     Map<String, Card> mapStorage;
 
     Map<String, Card> map = Stream.of(
@@ -35,6 +38,7 @@ public class TransferRepository {
 
     public TransferRepository() {
         this.mapStorage = new ConcurrentHashMap<>(map);
+        this.transferLog = TransferLog.getInstance();
     }
 
     public void transferMoneyCardToCard(Card cardFrom, String cardNumberTo, Amount amount) {
@@ -52,6 +56,13 @@ public class TransferRepository {
                         mapStorage.get(cardFrom.getCardNumber()).getAmount().setValue(balanceFrom - amount.getValue());
                         int balanceTo = mapStorage.get(cardNumberTo).getAmount().getValue();
                         mapStorage.get(cardNumberTo).getAmount().setValue(balanceTo + amount.getValue());
+                        LogBuilder logBuilder = new LogBuilder()
+                                .setCardNumberFrom(cardFrom.getCardNumber())
+                                .setCardNumberTo(cardNumberTo)
+                                .setAmount(amount)
+                                .setCommission(new Amount(amount.getValue() / 10, "RUR"))
+                                .setResult("УСПЕХ");
+                        transferLog.log(logBuilder);
                     }
                 }
             }
