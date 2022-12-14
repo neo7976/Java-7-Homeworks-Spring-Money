@@ -10,6 +10,7 @@ public class Card{
     private String cardValidTill;
     @NotNull
     private String cardCVV;
+    //Можно подумать над созданием списка разных валют на 1 карте
     private Currency currency;
 
     public Card(String cardNumber, String cardValidTill, String cardCVV, Currency currency) {
@@ -19,12 +20,12 @@ public class Card{
         this.currency = currency;
     }
 
-    public Card(String cardNumber, String cardValidTill, String cardCVV) {
+    public Card(String cardNumber) {
         this.cardNumber = cardNumber;
-        this.cardValidTill = cardValidTill;
-        this.cardCVV = cardCVV;
     }
 
+    public Card() {
+    }
     //    public Card(String cardNumber) {
 //        this.cardNumber = cardNumber;
 //    }

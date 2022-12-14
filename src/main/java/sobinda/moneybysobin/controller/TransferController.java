@@ -17,7 +17,7 @@ public class TransferController {
     }
 
     @PostMapping("/transfer")
-    public void transferMoneyCardToCard(@RequestBody @Validated Card cardFrom, @RequestBody @Validated Card cardTo, Currency currency) {
+    public void transferMoneyCardToCard(@RequestBody @Validated Card cardFrom, @RequestBody @Validated Card cardTo, @RequestBody Currency currency) {
         //выбрать расширение и что возвращает при переводе с карты на карту
         //Принимать перевод на карту, возможно, требуется только номер карты и переделать на @RequestParam("cardNumber")
         transferService.transferMoneyCardToCard(cardFrom, cardTo, currency);
