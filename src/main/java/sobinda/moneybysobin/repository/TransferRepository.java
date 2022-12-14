@@ -58,6 +58,11 @@ public class TransferRepository {
             // возможно после удачной обработки требуется перекинуть на путь подтверждения операции
             // (или создание цепочки для этого условия)
         }
+
+        //todo потом удалить
+        for (Map.Entry<String, Card> entry : mapStorage.entrySet()) {
+            System.out.println(entry);
+        }
         // или возвращаем 0 или выполняем условие для выброса ошибки
 
     }
