@@ -1,6 +1,7 @@
 package sobinda.moneybysobin.repository;
 
 import org.springframework.stereotype.Repository;
+import org.springframework.validation.annotation.Validated;
 import sobinda.moneybysobin.log.LogBuilder;
 import sobinda.moneybysobin.log.TransferLog;
 import sobinda.moneybysobin.model.Amount;
@@ -52,15 +53,17 @@ public class TransferRepository {
                 if (mapStorage.get(cardFrom.getCardNumber()).equals(cardFrom)) {
                     //Скорее всего нужно переместить локику в Класс карт на перевод с одной на вторую
                     int balanceFrom = mapStorage.get(cardFrom.getCardNumber()).getAmount().getValue();
-                    if (balanceFrom >= amount.getValue()) {
-                        mapStorage.get(cardFrom.getCardNumber()).getAmount().setValue(balanceFrom - amount.getValue());
+                    Amount commission = new Amount(amount.getValue() / 10, amount.getCurrency());
+                    int sumResult = commission.getValue() + amount.getValue();
+                    if (balanceFrom >= sumResult) {
+                        mapStorage.get(cardFrom.getCardNumber()).getAmount().setValue(balanceFrom - sumResult);
                         int balanceTo = mapStorage.get(cardNumberTo).getAmount().getValue();
                         mapStorage.get(cardNumberTo).getAmount().setValue(balanceTo + amount.getValue());
                         LogBuilder logBuilder = new LogBuilder()
                                 .setCardNumberFrom(cardFrom.getCardNumber())
                                 .setCardNumberTo(cardNumberTo)
                                 .setAmount(amount)
-                                .setCommission(new Amount(amount.getValue() / 10, "RUR"))
+                                .setCommission(commission)
                                 .setResult("УСПЕХ");
                         transferLog.log(logBuilder);
                     }
