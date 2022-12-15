@@ -2,6 +2,7 @@ package sobinda.moneybysobin.repository;
 
 import org.springframework.stereotype.Repository;
 import org.springframework.validation.annotation.Validated;
+import sobinda.moneybysobin.exceptions.InvalidTransactionExceptions;
 import sobinda.moneybysobin.log.LogBuilder;
 import sobinda.moneybysobin.log.TransferLog;
 import sobinda.moneybysobin.model.Amount;
@@ -42,7 +43,7 @@ public class TransferRepository {
         this.transferLog = TransferLog.getInstance();
     }
 
-    public void transferMoneyCardToCard(Card cardFrom, String cardNumberTo, Amount amount) {
+    public void transferMoneyCardToCard(Card cardFrom, String cardNumberTo, Amount amount) throws InvalidTransactionExceptions {
         // написать сверку данных по карте из базы, проверка баланса и существование карты приема денег
         // выбрать, что в итоге возвращаем
 
@@ -72,6 +73,15 @@ public class TransferRepository {
             // пишем проверку баланса и перевод денег
             // возможно после удачной обработки требуется перекинуть на путь подтверждения операции
             // (или создание цепочки для этого условия)
+        }
+        else {
+            LogBuilder logBuilder = new LogBuilder()
+                    .setCardNumberFrom(cardFrom.getCardNumber())
+                    .setCardNumberTo(cardNumberTo)
+                    .setAmount(amount)
+                    .setResult("ОТКАЗ");
+            //Выброс общей ошибки на все случаи
+            throw new InvalidTransactionExceptions(transferLog.log(logBuilder));
         }
 
         //todo потом удалить

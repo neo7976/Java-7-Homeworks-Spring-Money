@@ -1,6 +1,7 @@
 package sobinda.moneybysobin.service;
 
 import org.springframework.stereotype.Service;
+import sobinda.moneybysobin.exceptions.InvalidTransactionExceptions;
 import sobinda.moneybysobin.model.Card;
 import sobinda.moneybysobin.model.CardTransfer;
 import sobinda.moneybysobin.model.Amount;
@@ -15,16 +16,9 @@ public class TransferService {
         this.transferRepository = transferRepository;
     }
 
-    public void transferMoneyCardToCard1(Card cardFrom, Card cardTo, Amount currency) {
+    public void transferMoneyCardToCard(CardTransfer cardTransfer) throws InvalidTransactionExceptions {
         // Написать логику обработки и проверки карты
         // выбрать, что в итоге возвращаем
-        transferRepository.transferMoneyCardToCard(cardFrom, cardTo.getCardNumber(), currency);
-    }
-
-    public void transferMoneyCardToCard(CardTransfer cardTransfer) {
-        // Написать логику обработки и проверки карты
-        // выбрать, что в итоге возвращаем
-//        transferRepository.transferMoneyCardToCard(cardFrom, cardTo.getCardNumber(), currency);
         Card cardFrom = new Card(
                 cardTransfer.getCardFromNumber(),
                 cardTransfer.getCardFromValidTill(),
