@@ -56,14 +56,4 @@ public class LogBuilder {
         return result;
     }
 
-    @Override
-    public String toString() {
-        return "LogBuilder{" +
-                "cardNumberFrom='" + cardNumberFrom + '\'' +
-                ", cardNumberTo='" + cardNumberTo + '\'' +
-                ", amount=" + amount +
-                ", commission=" + commission +
-                ", result='" + result + '\'' +
-                '}';
-    }
 }
