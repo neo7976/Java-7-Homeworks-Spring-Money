@@ -51,13 +51,16 @@ public class TransferRepository {
 
         //проверяем наличии карт в базе
         if (mapStorage.containsKey(cardFrom.getCardNumber()) && mapStorage.containsKey(cardNumberTo)) {
+
             //проверяем на совпадаение валюты перевода и валюты на карте
             if (mapStorage.get(cardNumberTo).getAmount().getCurrency().equals(amount.getCurrency())) {
+
                 if (mapStorage.get(cardFrom.getCardNumber()).equals(cardFrom)) {
                     //Скорее всего нужно переместить локику в Класс карт на перевод с одной на вторую
                     int balanceFrom = mapStorage.get(cardFrom.getCardNumber()).getAmount().getValue();
                     Amount commission = new Amount(amount.getValue() / 10, amount.getCurrency());
                     int sumResult = commission.getValue() + amount.getValue();
+
                     if (balanceFrom >= sumResult) {
                         mapStorage.get(cardFrom.getCardNumber()).getAmount().setValue(balanceFrom - sumResult);
                         int balanceTo = mapStorage.get(cardNumberTo).getAmount().getValue();
@@ -90,7 +93,6 @@ public class TransferRepository {
             System.out.println(entry);
         }
         // или возвращаем 0 или выполняем условие для выброса ошибки
-
     }
 
 }
