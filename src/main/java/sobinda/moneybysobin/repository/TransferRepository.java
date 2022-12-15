@@ -1,7 +1,6 @@
 package sobinda.moneybysobin.repository;
 
 import org.springframework.stereotype.Repository;
-import org.springframework.validation.annotation.Validated;
 import sobinda.moneybysobin.exceptions.InvalidTransactionExceptions;
 import sobinda.moneybysobin.log.LogBuilder;
 import sobinda.moneybysobin.log.TransferLog;
@@ -43,6 +42,9 @@ public class TransferRepository {
         this.transferLog = TransferLog.getInstance();
     }
 
+    //todo добаваить проверку на совпадение карты перевода и на которую переводят = одинаково,
+    // преобразить все в цепочную зависимость (если получися)
+
     public void transferMoneyCardToCard(Card cardFrom, String cardNumberTo, Amount amount) throws InvalidTransactionExceptions {
         // написать сверку данных по карте из базы, проверка баланса и существование карты приема денег
         // выбрать, что в итоге возвращаем
@@ -73,8 +75,7 @@ public class TransferRepository {
             // пишем проверку баланса и перевод денег
             // возможно после удачной обработки требуется перекинуть на путь подтверждения операции
             // (или создание цепочки для этого условия)
-        }
-        else {
+        } else {
             LogBuilder logBuilder = new LogBuilder()
                     .setCardNumberFrom(cardFrom.getCardNumber())
                     .setCardNumberTo(cardNumberTo)
