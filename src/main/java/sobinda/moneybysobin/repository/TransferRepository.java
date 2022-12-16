@@ -36,55 +36,42 @@ public class TransferRepository {
             )
             .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
 
-
     public TransferRepository() {
         this.mapStorage = new ConcurrentHashMap<>(map);
         this.transferLog = TransferLog.getInstance();
     }
 
-    //todo добаваить проверку на совпадение карты перевода и на которую переводят = одинаково,
-    // преобразить все в цепочную зависимость (если получися)
+    public String transferMoneyCardToCard(Card cardFrom, String cardNumberTo, Amount amount) throws InvalidTransactionExceptions {
+        //проверяем на наличие карт в базе, валюты на карте
+        validCardToBase(cardFrom, cardNumberTo);
+        validCurrencyCardTo(cardNumberTo, amount);
 
-    public void transferMoneyCardToCard(Card cardFrom, String cardNumberTo, Amount amount) throws InvalidTransactionExceptions {
-        // написать сверку данных по карте из базы, проверка баланса и существование карты приема денег
-        // выбрать, что в итоге возвращаем
+        int balanceFrom = mapStorage.get(cardFrom.getCardNumber()).getAmount().getValue();
+        Amount commission = new Amount(amount.getValue() / 10, amount.getCurrency());
+        int sumResult = commission.getValue() + amount.getValue();
 
-        //проверяем наличии карт в базе
-        if (mapStorage.containsKey(cardFrom.getCardNumber()) && mapStorage.containsKey(cardNumberTo)) {
+        // пишем проверку баланса и перевод денег
+        if (balanceFrom >= sumResult) {
+            mapStorage.get(cardFrom.getCardNumber()).getAmount().setValue(balanceFrom - sumResult);
+            int balanceTo = mapStorage.get(cardNumberTo).getAmount().getValue();
+            mapStorage.get(cardNumberTo).getAmount().setValue(balanceTo + amount.getValue());
+            LogBuilder logBuilder = new LogBuilder()
+                    .setCardNumberFrom(cardFrom.getCardNumber())
+                    .setCardNumberTo(cardNumberTo)
+                    .setAmount(amount)
+                    .setCommission(commission)
+                    .setResult("УСПЕХ");
+            transferLog.log(logBuilder);
 
-            //проверяем на совпадаение валюты перевода и валюты на карте
-            if (mapStorage.get(cardNumberTo).getAmount().getCurrency().equals(amount.getCurrency())) {
+            // todo возможно после удачной обработки требуется перекинуть на путь подтверждения операции
 
-                if (mapStorage.get(cardFrom.getCardNumber()).equals(cardFrom)) {
-                    //Скорее всего нужно переместить локику в Класс карт на перевод с одной на вторую
-                    int balanceFrom = mapStorage.get(cardFrom.getCardNumber()).getAmount().getValue();
-                    Amount commission = new Amount(amount.getValue() / 10, amount.getCurrency());
-                    int sumResult = commission.getValue() + amount.getValue();
-
-                    if (balanceFrom >= sumResult) {
-                        mapStorage.get(cardFrom.getCardNumber()).getAmount().setValue(balanceFrom - sumResult);
-                        int balanceTo = mapStorage.get(cardNumberTo).getAmount().getValue();
-                        mapStorage.get(cardNumberTo).getAmount().setValue(balanceTo + amount.getValue());
-                        LogBuilder logBuilder = new LogBuilder()
-                                .setCardNumberFrom(cardFrom.getCardNumber())
-                                .setCardNumberTo(cardNumberTo)
-                                .setAmount(amount)
-                                .setCommission(commission)
-                                .setResult("УСПЕХ");
-                        transferLog.log(logBuilder);
-                    }
-                }
-            }
-            // пишем проверку баланса и перевод денег
-            // возможно после удачной обработки требуется перекинуть на путь подтверждения операции
-            // (или создание цепочки для этого условия)
         } else {
             LogBuilder logBuilder = new LogBuilder()
                     .setCardNumberFrom(cardFrom.getCardNumber())
                     .setCardNumberTo(cardNumberTo)
                     .setAmount(amount)
-                    .setResult("ОТКАЗ");
-            //Выброс общей ошибки на все случаи
+                    .setCommission(commission)
+                    .setResult("НЕДОСТАТОЧНО СРЕДСТВ ДЛЯ ОПЕРАЦИИ");
             throw new InvalidTransactionExceptions(transferLog.log(logBuilder));
         }
 
@@ -92,7 +79,33 @@ public class TransferRepository {
         for (Map.Entry<String, Card> entry : mapStorage.entrySet()) {
             System.out.println(entry);
         }
-        // или возвращаем 0 или выполняем условие для выброса ошибки
+        return String.format("Статус перевод с карты \"%s\" на карту \"%s\"  в размере %d [%s] - [УСПЕХ]\nБаланс Вашей карты: %d [%s]",
+                cardFrom.getCardNumber(),
+                cardNumberTo,
+                amount.getValue(),
+                amount.getCurrency(),
+                mapStorage.get(cardFrom.getCardNumber()).getAmount().getValue(),
+                amount.getCurrency());
     }
 
+    public void validCardToBase(Card cardFrom, String cardNumberTo) throws InvalidTransactionExceptions {
+        if (!mapStorage.containsKey(cardFrom.getCardNumber()) || !mapStorage.containsKey(cardNumberTo)) {
+            throw new InvalidTransactionExceptions("Одной из карт нет в базе данных");
+        }
+        if (!mapStorage.get(cardFrom.getCardNumber()).equals(cardFrom)) {
+            throw new InvalidTransactionExceptions("Ошибка в доступе к карте списания");
+        }
+        System.out.println("Карты имеются в базе");
+    }
+
+    public void validCurrencyCardTo(String cardNumberTo, Amount amount) throws InvalidTransactionExceptions {
+        if (!mapStorage.get(cardNumberTo).getAmount().getCurrency().equals(amount.getCurrency())) {
+            throw new InvalidTransactionExceptions(String.format("Карта %s не имеет валютный счёт [%s] для перевода\n",
+                    cardNumberTo,
+                    amount.getCurrency()));
+        }
+        System.out.printf("На карте %s имеется валютный счёт [%s] для перевода\n",
+                cardNumberTo,
+                amount.getCurrency());
+    }
 }

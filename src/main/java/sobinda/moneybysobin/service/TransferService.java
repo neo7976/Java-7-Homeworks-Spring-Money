@@ -9,26 +9,26 @@ import sobinda.moneybysobin.repository.TransferRepository;
 
 @Service
 public class TransferService {
-
     TransferRepository transferRepository;
 
     public TransferService(TransferRepository transferRepository) {
         this.transferRepository = transferRepository;
     }
 
-    public void transferMoneyCardToCard(CardTransfer cardTransfer) throws InvalidTransactionExceptions {
-        // Написать логику обработки и проверки карты
-        // выбрать, что в итоге возвращаем
+    public String transferMoneyCardToCard(CardTransfer cardTransfer) throws InvalidTransactionExceptions {
         Card cardFrom = new Card(
                 cardTransfer.getCardFromNumber(),
                 cardTransfer.getCardFromValidTill(),
                 cardTransfer.getCardFromCVV()
         );
 
-        String cardTo = cardTransfer.getCardToNumber();
+        String cardToNumber = cardTransfer.getCardToNumber();
         Amount amount = new Amount(cardTransfer.getAmount().getValue(),
-                                    cardTransfer.getAmount().getCurrency());
-
-        transferRepository.transferMoneyCardToCard(cardFrom, cardTo, amount);
+                cardTransfer.getAmount().getCurrency());
+        if (cardFrom.getCardNumber().equals(cardToNumber)) {
+            throw new InvalidTransactionExceptions("Карта для перевода и получения совпадает!\n" +
+                    "Проверьте входные данные ещё раз");
+        }
+        return transferRepository.transferMoneyCardToCard(cardFrom, cardToNumber, amount);
     }
 }

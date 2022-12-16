@@ -1,8 +1,7 @@
 package sobinda.moneybysobin.log;
 
-import sobinda.moneybysobin.model.Amount;
-
 import java.io.BufferedWriter;
+import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.time.LocalDateTime;
@@ -16,6 +15,7 @@ public class TransferLog {
     private final ConcurrentHashMap<String, Integer> cardTransactions = new ConcurrentHashMap<>();
     private static volatile TransferLog INSTANCE = null;
 
+    File file = new File("src/main/resources/log/logCardTransactions.log");
 
     private TransferLog() {
     }
@@ -56,8 +56,13 @@ public class TransferLog {
 
     public void writeLog(String s) {
         try {
+            if (!file.exists()) {
+                boolean folder = new File("src/main/resources/log").mkdir();
+                //создаем файл
+                file.createNewFile();
+            }
             BufferedWriter bf = new BufferedWriter(new FileWriter(
-                    "src/main/resources/log/logCardTransactions.log", true));
+                    file, true));
             bf.write(s);
             bf.flush();
         } catch (IOException e) {

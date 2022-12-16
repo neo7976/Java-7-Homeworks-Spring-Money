@@ -17,9 +17,9 @@ public class TransferController {
     }
 
     @PostMapping("/transfer")
-    public void transferMoneyCardToCard(@RequestBody @Validated CardTransfer cardTransfer) throws InvalidTransactionExceptions {
+    public String transferMoneyCardToCard(@RequestBody @Validated CardTransfer cardTransfer) throws InvalidTransactionExceptions {
         //выбрать расширение и что возвращает при переводе с карты на карту
-        transferService.transferMoneyCardToCard(cardTransfer);
+        return transferService.transferMoneyCardToCard(cardTransfer);
     }
 
     @PostMapping("/confirmOperation")
