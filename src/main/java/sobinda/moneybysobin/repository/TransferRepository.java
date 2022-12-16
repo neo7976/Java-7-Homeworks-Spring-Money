@@ -79,7 +79,8 @@ public class TransferRepository {
         for (Map.Entry<String, Card> entry : mapStorage.entrySet()) {
             System.out.println(entry);
         }
-        return String.format("Статус перевод с карты \"%s\" на карту \"%s\"  в размере %d [%s] - [УСПЕХ]\nБаланс Вашей карты: %d [%s]",
+        return String.format("Статус перевод с карты \"%s\" на карту \"%s\"  в размере %d [%s] - [УСПЕХ]\n" +
+                        "Баланс Вашей карты: %d [%s]",
                 cardFrom.getCardNumber(),
                 cardNumberTo,
                 amount.getValue(),
@@ -95,7 +96,7 @@ public class TransferRepository {
         if (!mapStorage.get(cardFrom.getCardNumber()).equals(cardFrom)) {
             throw new InvalidTransactionExceptions("Ошибка в доступе к карте списания");
         }
-        System.out.println("Карты имеются в базе");
+//        System.out.println("Карты имеются в базе");
     }
 
     public void validCurrencyCardTo(String cardNumberTo, Amount amount) throws InvalidTransactionExceptions {
@@ -104,8 +105,8 @@ public class TransferRepository {
                     cardNumberTo,
                     amount.getCurrency()));
         }
-        System.out.printf("На карте %s имеется валютный счёт [%s] для перевода\n",
-                cardNumberTo,
-                amount.getCurrency());
+//        System.out.printf("На карте %s имеется валютный счёт [%s] для перевода\n",
+//                cardNumberTo,
+//                amount.getCurrency());
     }
 }
