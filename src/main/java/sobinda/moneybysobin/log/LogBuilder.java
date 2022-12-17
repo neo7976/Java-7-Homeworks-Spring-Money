@@ -22,12 +22,14 @@ public class LogBuilder {
     }
 
     public LogBuilder setAmount(Amount amount) {
-        this.amount = amount;
+        //С front приходит х100
+        this.amount = new Amount(amount.getValue()/100, amount.getCurrency());
         return this;
     }
 
     public LogBuilder setCommission(Amount commission) {
-        this.commission = commission;
+        //С front приходит х100
+        this.commission = new Amount(commission.getValue() / 100, commission.getCurrency());
         return this;
     }
 

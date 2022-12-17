@@ -1,4 +1,4 @@
-package sobinda.moneybysobin.controller;
+package sobinda.moneybysobin.model.controller;
 
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
@@ -16,10 +16,6 @@ public class TransferController {
         this.transferService = transferService;
     }
 
-//    @RequestMapping(
-//            method = {RequestMethod.POST},
-//            name = "/transfer"
-//    )
     @PostMapping("/transfer")
     public String transferMoneyCardToCard(@RequestBody @Validated CardTransfer cardTransfer) throws InvalidTransactionExceptions {
         //выбрать расширение и что возвращает при переводе с карты на карту
