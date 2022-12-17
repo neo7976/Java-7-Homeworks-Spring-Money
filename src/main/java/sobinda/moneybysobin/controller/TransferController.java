@@ -1,12 +1,12 @@
 package sobinda.moneybysobin.controller;
 
 import org.springframework.validation.annotation.Validated;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 import sobinda.moneybysobin.exceptions.InvalidTransactionExceptions;
 import sobinda.moneybysobin.model.CardTransfer;
 import sobinda.moneybysobin.service.TransferService;
+
+import javax.annotation.processing.SupportedOptions;
 
 @RestController
 public class TransferController {
@@ -16,6 +16,10 @@ public class TransferController {
         this.transferService = transferService;
     }
 
+//    @RequestMapping(
+//            method = {RequestMethod.POST},
+//            name = "/transfer"
+//    )
     @PostMapping("/transfer")
     public String transferMoneyCardToCard(@RequestBody @Validated CardTransfer cardTransfer) throws InvalidTransactionExceptions {
         //выбрать расширение и что возвращает при переводе с карты на карту

@@ -20,16 +20,16 @@ public class TransferRepository {
 
     Map<String, Card> map = Stream.of(
                     new AbstractMap.SimpleEntry<>(
-                            "4558 4458 8558 4747",
+                            "4558445885584747",
                             new Card(
-                                    "4558 4458 8558 4747",
+                                    "4558445885584747",
                                     "08/23",
                                     "351",
                                     new Amount(50_000, "RUR"))),
                     new AbstractMap.SimpleEntry<>(
-                            "4558 4458 8558 5555",
+                            "4558445885585555",
                             new Card(
-                                    "4558 4458 8558 5555",
+                                    "4558445885585555",
                                     "08/23",
                                     "352",
                                     new Amount(25_000, "RUR")))

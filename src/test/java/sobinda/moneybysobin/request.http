@@ -8,10 +8,10 @@ Content-Type: application/json
 
 
   {
-    "cardFromNumber": "4558 4458 8558 4747",
+    "cardFromNumber": "4558445885584747",
     "cardFromValidTill": "08/23",
     "cardFromCVV": "351",
-    "cardToNumber": "4558 4458 8558 5555",
+    "cardToNumber": "4558445885585555",
     "amount": {
       "value": 500,
       "currency": "RUR"
@@ -26,10 +26,10 @@ Content-Type: application/json
 
 //Неправильный номер карты
 {
-  "cardFromNumber": "4558 4458 8558 4746",
+  "cardFromNumber": "4558445885584746",
   "cardFromValidTill": "08/23",
   "cardFromCVV": "351",
-  "cardToNumber": "4558 4458 8558 5555",
+  "cardToNumber": "4558445885585555",
   "amount": {
     "value": 500,
     "currency": "RUR"
@@ -43,10 +43,10 @@ Content-Type: application/json
 
 //Неправильный номер карты
 {
-  "cardFromNumber": "4558 4458 8558 4747",
+  "cardFromNumber": "4558445885584747",
   "cardFromValidTill": "08/23",
   "cardFromCVV": "350",
-  "cardToNumber": "4558 4458 8558 5555",
+  "cardToNumber": "4558445885585555",
   "amount": {
     "value": 500,
     "currency": "RUR"
@@ -60,10 +60,10 @@ Content-Type: application/json
 
 //Недостаточно средст на карте
 {
-  "cardFromNumber": "4558 4458 8558 4747",
+  "cardFromNumber": "4558445885584747",
   "cardFromValidTill": "08/23",
   "cardFromCVV": "351",
-  "cardToNumber": "4558 4458 8558 5555",
+  "cardToNumber": "4558445885585555",
   "amount": {
     "value": 500000,
     "currency": "RUR"
