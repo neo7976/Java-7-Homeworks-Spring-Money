@@ -5,6 +5,7 @@ import sobinda.moneybysobin.exceptions.InvalidTransactionExceptions;
 import sobinda.moneybysobin.model.Card;
 import sobinda.moneybysobin.model.CardTransfer;
 import sobinda.moneybysobin.model.Amount;
+import sobinda.moneybysobin.model.Verification;
 import sobinda.moneybysobin.repository.TransferRepository;
 
 @Service
@@ -30,5 +31,9 @@ public class TransferService {
                     "Проверьте входные данные ещё раз");
         }
         return transferRepository.transferMoneyCardToCard(cardFrom, cardToNumber, amount);
+    }
+
+    public String confirmOperation(Verification verification) {
+        return transferRepository.confirmOperation(verification);
     }
 }

@@ -1,12 +1,11 @@
-package sobinda.moneybysobin.model.controller;
+package sobinda.moneybysobin.controller;
 
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import sobinda.moneybysobin.exceptions.InvalidTransactionExceptions;
 import sobinda.moneybysobin.model.CardTransfer;
+import sobinda.moneybysobin.model.Verification;
 import sobinda.moneybysobin.service.TransferService;
-
-import javax.annotation.processing.SupportedOptions;
 
 @RestController
 public class TransferController {
@@ -23,8 +22,9 @@ public class TransferController {
     }
 
     @PostMapping("/confirmOperation")
-    public void ConfirmOperation() {
+    public String confirmOperation(@RequestBody @Validated Verification verification) {
         //подтверждение нашей операции после успешной проверки карт
         //выбрать расширение и что возвращает
+        return transferService.confirmOperation(verification);
     }
 }

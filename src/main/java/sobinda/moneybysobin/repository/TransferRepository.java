@@ -6,6 +6,7 @@ import sobinda.moneybysobin.log.LogBuilder;
 import sobinda.moneybysobin.log.TransferLog;
 import sobinda.moneybysobin.model.Amount;
 import sobinda.moneybysobin.model.Card;
+import sobinda.moneybysobin.model.Verification;
 
 import java.util.AbstractMap;
 import java.util.Map;
@@ -99,5 +100,10 @@ public class TransferRepository {
                     cardNumberTo,
                     amount.getCurrency()));
         }
+    }
+
+    public String confirmOperation(Verification verification) {
+        //заглушка
+        return "0000";
     }
 }
