@@ -13,7 +13,7 @@ Content-Type: application/json
     "cardFromCVV": "351",
     "cardToNumber": "4558445885585555",
     "amount": {
-      "value": 500,
+      "value": 50000,
       "currency": "RUR"
     }
   }
@@ -31,7 +31,7 @@ Content-Type: application/json
   "cardFromCVV": "351",
   "cardToNumber": "4558445885585555",
   "amount": {
-    "value": 500,
+    "value": 50000,
     "currency": "RUR"
   }
 }
@@ -48,7 +48,7 @@ Content-Type: application/json
   "cardFromCVV": "350",
   "cardToNumber": "4558445885585555",
   "amount": {
-    "value": 500,
+    "value": 50000,
     "currency": "RUR"
   }
 }
@@ -65,7 +65,7 @@ Content-Type: application/json
   "cardFromCVV": "351",
   "cardToNumber": "4558445885585555",
   "amount": {
-    "value": 500000,
+    "value": 50000000,
     "currency": "RUR"
   }
 }

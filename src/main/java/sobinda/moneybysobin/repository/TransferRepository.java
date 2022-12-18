@@ -17,6 +17,8 @@ import java.util.stream.Stream;
 public class TransferRepository {
     TransferLog transferLog;
     Map<String, Card> mapStorage;
+    //1%
+    private final int COMMISSION = 100;
 
     Map<String, Card> map = Stream.of(
                     new AbstractMap.SimpleEntry<>(
@@ -25,7 +27,7 @@ public class TransferRepository {
                                     "4558445885584747",
                                     "08/23",
                                     "351",
-                                    new Amount(5_000_00, "RUR"))),
+                                    new Amount(50_000_00, "RUR"))),
                     new AbstractMap.SimpleEntry<>(
                             "4558445885585555",
                             new Card(
@@ -47,15 +49,16 @@ public class TransferRepository {
         validCurrencyCardTo(cardNumberTo, amount);
 
         int balanceFrom = mapStorage.get(cardFrom.getCardNumber()).getAmount().getValue();
-        Amount commission = new Amount(amount.getValue() / 10, amount.getCurrency());
+        Amount commission = new Amount(amount.getValue() / COMMISSION, amount.getCurrency());
         int sumResult = commission.getValue() + amount.getValue();
 
         // пишем проверку баланса и перевод денег
+        LogBuilder logBuilder;
         if (balanceFrom >= sumResult) {
             mapStorage.get(cardFrom.getCardNumber()).getAmount().setValue(balanceFrom - sumResult);
             int balanceTo = mapStorage.get(cardNumberTo).getAmount().getValue();
             mapStorage.get(cardNumberTo).getAmount().setValue(balanceTo + amount.getValue());
-            LogBuilder logBuilder = new LogBuilder()
+            logBuilder = new LogBuilder()
                     .setCardNumberFrom(cardFrom.getCardNumber())
                     .setCardNumberTo(cardNumberTo)
                     .setAmount(amount)
@@ -63,7 +66,7 @@ public class TransferRepository {
                     .setResult("УСПЕХ");
             transferLog.log(logBuilder);
         } else {
-            LogBuilder logBuilder = new LogBuilder()
+            logBuilder = new LogBuilder()
                     .setCardNumberFrom(cardFrom.getCardNumber())
                     .setCardNumberTo(cardNumberTo)
                     .setAmount(amount)
@@ -71,13 +74,13 @@ public class TransferRepository {
                     .setResult("НЕДОСТАТОЧНО СРЕДСТВ ДЛЯ ОПЕРАЦИИ");
             throw new InvalidTransactionExceptions(transferLog.log(logBuilder));
         }
-        return String.format("Статус перевод с карты \"%s\" на карту \"%s\"  в размере %d [%s] - [УСПЕХ]\n" +
+        //c front получаем х100 значения (копейки)
+        return String.format("Статус перевод с карты \"%s\" на карту \"%s\"  в размере %s - [УСПЕХ]\n" +
                         "Баланс Вашей карты: %d [%s]",
                 cardFrom.getCardNumber(),
                 cardNumberTo,
-                amount.getValue()/100,
-                amount.getCurrency(),
-                mapStorage.get(cardFrom.getCardNumber()).getAmount().getValue()/100,
+                logBuilder.getAmount(),
+                mapStorage.get(cardFrom.getCardNumber()).getAmount().getValue() / 100,
                 amount.getCurrency());
     }
 
