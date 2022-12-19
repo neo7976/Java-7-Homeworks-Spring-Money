@@ -33,7 +33,7 @@ public class TransferService {
         return transferRepository.transferMoneyCardToCard(cardFrom, cardToNumber, amount);
     }
 
-    public String confirmOperation(Verification verification) {
+    public String confirmOperation(Verification verification) throws InvalidTransactionExceptions {
         return transferRepository.confirmOperation(verification);
     }
 }

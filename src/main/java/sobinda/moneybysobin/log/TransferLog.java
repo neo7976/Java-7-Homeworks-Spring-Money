@@ -1,5 +1,7 @@
 package sobinda.moneybysobin.log;
 
+import sobinda.moneybysobin.model.Operation;
+
 import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileWriter;
@@ -13,6 +15,7 @@ public class TransferLog {
     private static final DateTimeFormatter dtf = DateTimeFormatter.ofPattern("yyyy/MM/dd HH:mm:ss");
     protected AtomicInteger num = new AtomicInteger(0);
     private final ConcurrentHashMap<String, Integer> cardTransactions = new ConcurrentHashMap<>();
+    private final ConcurrentHashMap<String, Operation> cardTransactionsWaitConfirmOperation = new ConcurrentHashMap<>();
     private static volatile TransferLog INSTANCE = null;
 
     File file = new File("src/main/resources/log/logCardTransactions.log");
@@ -31,10 +34,11 @@ public class TransferLog {
     }
 
     public String log(LogBuilder logBuilder) {
+        String operationId = String.valueOf(num.incrementAndGet());
         cardTransactions.put(logBuilder.getCardNumberFrom(), cardTransactions.getOrDefault(logBuilder.getCardNumberFrom(), 0) + 1);
         String s = String.format(
                 "[%s]\n" +
-                        "Операция в системе: №%d\n" +
+                        "Операция в системе: №%s\n" +
                         "Операция по карте: №%d\n" +
                         "Номер карты списания: %s\n" +
                         "Номер карты зачисления: %s\n" +
@@ -42,7 +46,7 @@ public class TransferLog {
                         "Комиссия за перевод: %s\n" +
                         "Результат операции: %s\n\n",
                 dtf.format(LocalDateTime.now()),
-                num.incrementAndGet(),
+                operationId,
                 cardTransactions.get(logBuilder.getCardNumberFrom()),
                 logBuilder.getCardNumberFrom(),
                 logBuilder.getCardNumberTo(),
@@ -51,7 +55,13 @@ public class TransferLog {
                 logBuilder.getResult()
         );
         writeLog(s);
-        return s;
+        cardTransactionsWaitConfirmOperation.put(operationId,
+                new Operation(
+                        logBuilder.getCardNumberFrom(),
+                        logBuilder.getCardNumberTo(),
+                        logBuilder.getAmount(),
+                        logBuilder.getCommission()));
+        return operationId;
     }
 
     public void writeLog(String s) {
@@ -68,5 +78,9 @@ public class TransferLog {
         } catch (IOException e) {
             e.printStackTrace();
         }
+    }
+
+    public ConcurrentHashMap<String, Operation> getCardTransactionsWaitConfirmOperation() {
+        return cardTransactionsWaitConfirmOperation;
     }
 }

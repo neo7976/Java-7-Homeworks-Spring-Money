@@ -22,7 +22,7 @@ public class TransferController {
     }
 
     @PostMapping("/confirmOperation")
-    public String confirmOperation(@RequestBody @Validated Verification verification) {
+    public String confirmOperation(@RequestBody @Validated Verification verification) throws InvalidTransactionExceptions {
         //подтверждение нашей операции после успешной проверки карт
         //выбрать расширение и что возвращает
         return transferService.confirmOperation(verification);

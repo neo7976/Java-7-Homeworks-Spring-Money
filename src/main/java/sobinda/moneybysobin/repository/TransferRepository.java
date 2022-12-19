@@ -6,6 +6,7 @@ import sobinda.moneybysobin.log.LogBuilder;
 import sobinda.moneybysobin.log.TransferLog;
 import sobinda.moneybysobin.model.Amount;
 import sobinda.moneybysobin.model.Card;
+import sobinda.moneybysobin.model.Operation;
 import sobinda.moneybysobin.model.Verification;
 
 import java.util.AbstractMap;
@@ -18,6 +19,8 @@ import java.util.stream.Stream;
 public class TransferRepository {
     TransferLog transferLog;
     Map<String, Card> mapStorage;
+    private final ConcurrentHashMap<String, Operation> cardTransactionsWaitConfirmOperation;
+
     //1%
     private final int COMMISSION = 100;
     private final String SECRET_CODE = "0000";
@@ -43,6 +46,7 @@ public class TransferRepository {
     public TransferRepository() {
         this.mapStorage = new ConcurrentHashMap<>(map);
         this.transferLog = TransferLog.getInstance();
+        cardTransactionsWaitConfirmOperation = new ConcurrentHashMap<>();
     }
 
     public String transferMoneyCardToCard(Card cardFrom, String cardNumberTo, Amount amount) throws InvalidTransactionExceptions {
@@ -57,16 +61,23 @@ public class TransferRepository {
         // пишем проверку баланса и перевод денег
         LogBuilder logBuilder;
         if (balanceFrom >= sumResult) {
-            mapStorage.get(cardFrom.getCardNumber()).getAmount().setValue(balanceFrom - sumResult);
-            int balanceTo = mapStorage.get(cardNumberTo).getAmount().getValue();
-            mapStorage.get(cardNumberTo).getAmount().setValue(balanceTo + amount.getValue());
+//            mapStorage.get(cardFrom.getCardNumber()).getAmount().setValue(balanceFrom - sumResult);
+//            int balanceTo = mapStorage.get(cardNumberTo).getAmount().getValue();
+//            mapStorage.get(cardNumberTo).getAmount().setValue(balanceTo + amount.getValue());
             logBuilder = new LogBuilder()
                     .setCardNumberFrom(cardFrom.getCardNumber())
                     .setCardNumberTo(cardNumberTo)
                     .setAmount(amount)
                     .setCommission(commission)
                     .setResult("ЗАПРОС НА ПЕРЕВОД");
-            transferLog.log(logBuilder);
+            String operationId = transferLog.log(logBuilder);
+            cardTransactionsWaitConfirmOperation.put(operationId,
+                    new Operation(
+                            logBuilder.getCardNumberFrom(),
+                            logBuilder.getCardNumberTo(),
+                            logBuilder.getAmount(),
+                            logBuilder.getCommission()));
+            return "Ожидаем подтверждение на перевод операции №" + operationId;
         } else {
             logBuilder = new LogBuilder()
                     .setCardNumberFrom(cardFrom.getCardNumber())
@@ -74,17 +85,18 @@ public class TransferRepository {
                     .setAmount(amount)
                     .setCommission(commission)
                     .setResult("НЕДОСТАТОЧНО СРЕДСТВ ДЛЯ ОПЕРАЦИИ");
-            throw new InvalidTransactionExceptions(transferLog.log(logBuilder));
+            transferLog.log(logBuilder);
+            throw new InvalidTransactionExceptions(logBuilder.getResult());
         }
         //c front получаем х100 значения (копейки)
         //todo требуется произвести оплату только после подтверждения операции. Создать отдельное поле для перезаписи, когда код совпал по id
-        return String.format("Статус перевод с карты \"%s\" на карту \"%s\"  в размере %s - [УСПЕХ]\n" +
-                        "Баланс Вашей карты: %d [%s]",
-                cardFrom.getCardNumber(),
-                cardNumberTo,
-                logBuilder.getAmount(),
-                mapStorage.get(cardFrom.getCardNumber()).getAmount().getValue() / 100,
-                amount.getCurrency());
+//        return String.format("Статус перевод с карты \"%s\" на карту \"%s\"  в размере %s - [УСПЕХ]\n" +
+//                        "Баланс Вашей карты: %d [%s]",
+//                cardFrom.getCardNumber(),
+//                cardNumberTo,
+//                logBuilder.getAmount(),
+//                mapStorage.get(cardFrom.getCardNumber()).getAmount().getValue() / 100,
+//                amount.getCurrency());
     }
 
     public void validCardToBase(Card cardFrom, String cardNumberTo) throws InvalidTransactionExceptions {
@@ -104,11 +116,24 @@ public class TransferRepository {
         }
     }
 
-    public String confirmOperation(Verification verification) {
-        if (verification.getCode().equals(SECRET_CODE)) {
-            //пишем логику, как вытаскиваем данные по id и перезаписываем в хранилище
-            //заглушка, надо вернуть лог успеха
-            return "Успех";
+    public String confirmOperation(Verification verification) throws InvalidTransactionExceptions {
+        //todo убрать null, когда сможем получать id c front
+        if (cardTransactionsWaitConfirmOperation.containsKey(verification.getOperationId()) || verification.getOperationId() == null) {
+            Operation operation = cardTransactionsWaitConfirmOperation.get(verification.getOperationId());
+            System.out.println("Найдена операция на очередь об оплате");
+            if (verification.getCode().equals(cardTransactionsWaitConfirmOperation.get(verification.getOperationId()).getSecretCode())) {
+                System.out.println("СЕКРЕТНЫЙ КОД СОВПАДАЕТ");
+                //пишем логику, как вытаскиваем данные по id и перезаписываем в хранилище
+                //заглушка, надо вернуть лог успеха
+                //todo дописать по аналогии
+                int balanceFrom = mapStorage.get(operation.getCardFromNumber()).getAmount().getValue();
+                mapStorage.get(operation.getCardNumber()).getAmount().setValue(balanceFrom - sumResult);
+                int balanceTo = mapStorage.get(cardNumberTo).getAmount().getValue();
+                mapStorage.get(cardNumberTo).getAmount().setValue(balanceTo + amount.getValue());
+                return "Успех";
+            }
+        } else {
+            throw new InvalidTransactionExceptions("Такой операции нет");
         }
         //выбросить ошибку в сервисе или репозитории и удалить временные данные
         return "Попробуй ещё раз";
