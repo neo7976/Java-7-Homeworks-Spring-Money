@@ -118,24 +118,32 @@ public class TransferRepository {
 
     public String confirmOperation(Verification verification) throws InvalidTransactionExceptions {
         //todo убрать null, когда сможем получать id c front
-        if (cardTransactionsWaitConfirmOperation.containsKey(verification.getOperationId()) || verification.getOperationId() == null) {
-            Operation operation = cardTransactionsWaitConfirmOperation.get(verification.getOperationId());
+        Operation operation;
+        if (cardTransactionsWaitConfirmOperation.containsKey(verification.getOperationId())) {
             System.out.println("Найдена операция на очередь об оплате");
-            if (verification.getCode().equals(cardTransactionsWaitConfirmOperation.get(verification.getOperationId()).getSecretCode())) {
-                System.out.println("СЕКРЕТНЫЙ КОД СОВПАДАЕТ");
-                //пишем логику, как вытаскиваем данные по id и перезаписываем в хранилище
-                //заглушка, надо вернуть лог успеха
-                //todo дописать по аналогии
-                int balanceFrom = mapStorage.get(operation.getCardFromNumber()).getAmount().getValue();
-                mapStorage.get(operation.getCardNumber()).getAmount().setValue(balanceFrom - sumResult);
-                int balanceTo = mapStorage.get(cardNumberTo).getAmount().getValue();
-                mapStorage.get(cardNumberTo).getAmount().setValue(balanceTo + amount.getValue());
-                return "Успех";
+            operation = cardTransactionsWaitConfirmOperation.get(verification.getOperationId());
+            return operationWithMoney(verification, operation);
+        } else if (verification.getOperationId() == null) {
+            System.out.println("Сработала заглушка");
+            for (Map.Entry<String, Operation> entry : cardTransactionsWaitConfirmOperation.entrySet()) {
+                operation = entry.getValue();
+                return operationWithMoney(verification, operation);
             }
-        } else {
-            throw new InvalidTransactionExceptions("Такой операции нет");
         }
         //выбросить ошибку в сервисе или репозитории и удалить временные данные
         return "Попробуй ещё раз";
+    }
+
+    private String operationWithMoney(Verification verification, Operation operation) throws InvalidTransactionExceptions {
+        if (verification.getCode().equals(operation.getSecretCode())) {
+            System.out.println("СЕКРЕТНЫЙ КОД СОВПАДАЕТ");
+            int balanceFrom = mapStorage.get(operation.getCardFromNumber()).getAmount().getValue();
+            mapStorage.get(operation.getCardFromNumber()).getAmount().setValue(balanceFrom - operation.getAmount().getValue() - operation.getCommission().getValue());
+            int balanceTo = mapStorage.get(operation.getCardToNumber()).getAmount().getValue();
+            mapStorage.get(operation.getCardToNumber()).getAmount().setValue(balanceTo + operation.getAmount().getValue());
+            return "Успех";
+        } else {
+            throw new InvalidTransactionExceptions("Такой операции нет");
+        }
     }
 }
