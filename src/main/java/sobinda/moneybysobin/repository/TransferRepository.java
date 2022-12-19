@@ -68,12 +68,7 @@ public class TransferRepository {
                     .setCommission(commission)
                     .setResult("ЗАПРОС НА ПЕРЕВОД");
             String operationId = transferLog.log(logBuilder);
-            cardTransactionsWaitConfirmOperation.put(operationId,
-                    new Operation(
-                            logBuilder.getCardNumberFrom(),
-                            logBuilder.getCardNumberTo(),
-                            logBuilder.getAmount(),
-                            logBuilder.getCommission()));
+            cardTransactionsWaitConfirmOperation.put(operationId, new Operation(logBuilder));
             return "Ожидаем подтверждение на перевод операции №" + operationId;
         } else {
             logBuilder = new LogBuilder()
@@ -134,7 +129,7 @@ public class TransferRepository {
                     .setCardNumberTo(operation.getCardToNumber())
                     .setAmount(operation.getAmount())
                     .setCommission(operation.getCommission())
-                    .setResult(String.format("ТРАНЗАКЦИЯ ПРОШЛА УСПЕШНО! ВАШ БАЛАНС СОСТАВЛЯЕТ:%.2f %s",
+                    .setResult(String.format("ТРАНЗАКЦИЯ ПРОШЛА УСПЕШНО! ВАШ БАЛАНС СОСТАВЛЯЕТ: %.2f %s",
                             (double) mapStorage.get(operation.getCardFromNumber()).getAmount().getValue() / 100,
                             operation.getAmount().getCurrency()));
             transferLog.log(logBuilder);

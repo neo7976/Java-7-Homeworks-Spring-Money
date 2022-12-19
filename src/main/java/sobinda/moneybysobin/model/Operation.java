@@ -1,5 +1,7 @@
 package sobinda.moneybysobin.model;
 
+import sobinda.moneybysobin.log.LogBuilder;
+
 import javax.validation.constraints.NotNull;
 
 public class Operation {
@@ -10,11 +12,11 @@ public class Operation {
     //Сделать генерацию кода, когда будет возможность отправить код и принять его через форму в front
     private final String secretCode;
 
-    public Operation(String cardFromNumber, String cardToNumber, Amount amount, Amount commission) {
-        this.cardFromNumber = cardFromNumber;
-        this.cardToNumber = cardToNumber;
-        this.amount = amount;
-        this.commission = commission;
+    public Operation(LogBuilder logBuilder) {
+        this.cardFromNumber = logBuilder.getCardNumberFrom();
+        this.cardToNumber = logBuilder.getCardNumberTo();
+        this.amount = logBuilder.getAmount();
+        this.commission = logBuilder.getCommission();
         this.secretCode = "0000";
     }
 
