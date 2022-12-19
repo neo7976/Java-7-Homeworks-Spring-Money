@@ -20,6 +20,7 @@ public class TransferRepository {
     Map<String, Card> mapStorage;
     //1%
     private final int COMMISSION = 100;
+    private final String SECRET_CODE = "0000";
 
     Map<String, Card> map = Stream.of(
                     new AbstractMap.SimpleEntry<>(
@@ -64,7 +65,7 @@ public class TransferRepository {
                     .setCardNumberTo(cardNumberTo)
                     .setAmount(amount)
                     .setCommission(commission)
-                    .setResult("УСПЕХ");
+                    .setResult("ЗАПРОС НА ПЕРЕВОД");
             transferLog.log(logBuilder);
         } else {
             logBuilder = new LogBuilder()
@@ -76,6 +77,7 @@ public class TransferRepository {
             throw new InvalidTransactionExceptions(transferLog.log(logBuilder));
         }
         //c front получаем х100 значения (копейки)
+        //todo требуется произвести оплату только после подтверждения операции. Создать отдельный файл для перезаписи, когда код совпал
         return String.format("Статус перевод с карты \"%s\" на карту \"%s\"  в размере %s - [УСПЕХ]\n" +
                         "Баланс Вашей карты: %d [%s]",
                 cardFrom.getCardNumber(),
@@ -103,7 +105,12 @@ public class TransferRepository {
     }
 
     public String confirmOperation(Verification verification) {
-        //заглушка
-        return "0000";
+        if (verification.getCode().equals(SECRET_CODE)) {
+            //пишем логику, как вытаскиваем данные по id и перезаписываем в хранилище
+            //заглушка, надо вернуть лог успеха
+            return "Успех";
+        }
+        //выбросить ошибку в сервисе или репозитории и удалить временные данные
+        return "Попробуй ещё раз";
     }
 }
