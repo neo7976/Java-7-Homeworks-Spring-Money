@@ -15,7 +15,6 @@ public class TransferLog {
     private static final DateTimeFormatter dtf = DateTimeFormatter.ofPattern("yyyy/MM/dd HH:mm:ss");
     protected AtomicInteger num = new AtomicInteger(0);
     private final ConcurrentHashMap<String, Integer> cardTransactions = new ConcurrentHashMap<>();
-    private final ConcurrentHashMap<String, Operation> cardTransactionsWaitConfirmOperation = new ConcurrentHashMap<>();
     private static volatile TransferLog INSTANCE = null;
 
     File file = new File("src/main/resources/log/logCardTransactions.log");
@@ -42,25 +41,21 @@ public class TransferLog {
                         "Операция по карте: №%d\n" +
                         "Номер карты списания: %s\n" +
                         "Номер карты зачисления: %s\n" +
-                        "Сумма списания: %s\n" +
-                        "Комиссия за перевод: %s\n" +
+                        "Сумма списания: %.2f %s\n" +
+                        "Комиссия за перевод: %.2f %s\n" +
                         "Результат операции: %s\n\n",
                 dtf.format(LocalDateTime.now()),
                 operationId,
                 cardTransactions.get(logBuilder.getCardNumberFrom()),
                 logBuilder.getCardNumberFrom(),
                 logBuilder.getCardNumberTo(),
-                logBuilder.getAmount(),
-                logBuilder.getCommission(),
+                (double) logBuilder.getAmount().getValue() / 100,
+                logBuilder.getAmount().getCurrency(),
+                (double) logBuilder.getCommission().getValue() / 100,
+                logBuilder.getCommission().getCurrency(),
                 logBuilder.getResult()
         );
         writeLog(s);
-        cardTransactionsWaitConfirmOperation.put(operationId,
-                new Operation(
-                        logBuilder.getCardNumberFrom(),
-                        logBuilder.getCardNumberTo(),
-                        logBuilder.getAmount(),
-                        logBuilder.getCommission()));
         return operationId;
     }
 
@@ -78,9 +73,5 @@ public class TransferLog {
         } catch (IOException e) {
             e.printStackTrace();
         }
-    }
-
-    public ConcurrentHashMap<String, Operation> getCardTransactionsWaitConfirmOperation() {
-        return cardTransactionsWaitConfirmOperation;
     }
 }

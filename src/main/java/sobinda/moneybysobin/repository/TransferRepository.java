@@ -61,9 +61,6 @@ public class TransferRepository {
         // пишем проверку баланса и перевод денег
         LogBuilder logBuilder;
         if (balanceFrom >= sumResult) {
-//            mapStorage.get(cardFrom.getCardNumber()).getAmount().setValue(balanceFrom - sumResult);
-//            int balanceTo = mapStorage.get(cardNumberTo).getAmount().getValue();
-//            mapStorage.get(cardNumberTo).getAmount().setValue(balanceTo + amount.getValue());
             logBuilder = new LogBuilder()
                     .setCardNumberFrom(cardFrom.getCardNumber())
                     .setCardNumberTo(cardNumberTo)
@@ -88,15 +85,6 @@ public class TransferRepository {
             transferLog.log(logBuilder);
             throw new InvalidTransactionExceptions(logBuilder.getResult());
         }
-        //c front получаем х100 значения (копейки)
-        //todo требуется произвести оплату только после подтверждения операции. Создать отдельное поле для перезаписи, когда код совпал по id
-//        return String.format("Статус перевод с карты \"%s\" на карту \"%s\"  в размере %s - [УСПЕХ]\n" +
-//                        "Баланс Вашей карты: %d [%s]",
-//                cardFrom.getCardNumber(),
-//                cardNumberTo,
-//                logBuilder.getAmount(),
-//                mapStorage.get(cardFrom.getCardNumber()).getAmount().getValue() / 100,
-//                amount.getCurrency());
     }
 
     public void validCardToBase(Card cardFrom, String cardNumberTo) throws InvalidTransactionExceptions {
@@ -119,19 +107,19 @@ public class TransferRepository {
     public String confirmOperation(Verification verification) throws InvalidTransactionExceptions {
         //todo убрать null, когда сможем получать id c front
         Operation operation;
-        if (cardTransactionsWaitConfirmOperation.containsKey(verification.getOperationId())) {
-            System.out.println("Найдена операция на очередь об оплате");
-            operation = cardTransactionsWaitConfirmOperation.get(verification.getOperationId());
-            return operationWithMoney(verification, operation);
-        } else if (verification.getOperationId() == null) {
+        if (verification.getOperationId() == null) {
             System.out.println("Сработала заглушка");
             for (Map.Entry<String, Operation> entry : cardTransactionsWaitConfirmOperation.entrySet()) {
                 operation = entry.getValue();
                 return operationWithMoney(verification, operation);
             }
+        } else if (cardTransactionsWaitConfirmOperation.containsKey(verification.getOperationId())) {
+            System.out.println("Найдена операция на очередь об оплате");
+            operation = cardTransactionsWaitConfirmOperation.get(verification.getOperationId());
+            return operationWithMoney(verification, operation);
         }
         //выбросить ошибку в сервисе или репозитории и удалить временные данные
-        return "Попробуй ещё раз";
+        throw new InvalidTransactionExceptions("Ошибочка, такого мы не предвидели!");
     }
 
     private String operationWithMoney(Verification verification, Operation operation) throws InvalidTransactionExceptions {
@@ -141,7 +129,16 @@ public class TransferRepository {
             mapStorage.get(operation.getCardFromNumber()).getAmount().setValue(balanceFrom - operation.getAmount().getValue() - operation.getCommission().getValue());
             int balanceTo = mapStorage.get(operation.getCardToNumber()).getAmount().getValue();
             mapStorage.get(operation.getCardToNumber()).getAmount().setValue(balanceTo + operation.getAmount().getValue());
-            return "Успех";
+            LogBuilder logBuilder = new LogBuilder()
+                    .setCardNumberFrom(operation.getCardFromNumber())
+                    .setCardNumberTo(operation.getCardToNumber())
+                    .setAmount(operation.getAmount())
+                    .setCommission(operation.getCommission())
+                    .setResult(String.format("ТРАНЗАКЦИЯ ПРОШЛА УСПЕШНО! ВАШ БАЛАНС СОСТАВЛЯЕТ:%.2f %s",
+                            (double) mapStorage.get(operation.getCardFromNumber()).getAmount().getValue() / 100,
+                            operation.getAmount().getCurrency()));
+            transferLog.log(logBuilder);
+            return "Успешная транзакция №" + verification.getOperationId();
         } else {
             throw new InvalidTransactionExceptions("Такой операции нет");
         }
