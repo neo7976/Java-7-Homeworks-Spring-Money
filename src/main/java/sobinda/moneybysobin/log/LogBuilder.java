@@ -22,13 +22,11 @@ public class LogBuilder {
     }
 
     public LogBuilder setAmount(Amount amount) {
-        //С front приходит х100
         this.amount = amount;
         return this;
     }
 
     public LogBuilder setCommission(Amount commission) {
-        //С front приходит х100
         this.commission = commission;
         return this;
     }
