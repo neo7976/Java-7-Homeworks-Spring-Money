@@ -1,0 +1,9 @@
+version: "3"
+
+services:
+  moneyapp:
+    image: "moneyapp"
+    container_name: "moneyapp-spring-bysobin"
+    build: ./
+    ports:
+      - 5500:5500
