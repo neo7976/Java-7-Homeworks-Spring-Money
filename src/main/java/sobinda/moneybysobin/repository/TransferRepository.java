@@ -131,9 +131,8 @@ public class TransferRepository {
                 transferLog.log(logBuilder);
                 return "Успешная транзакция №" + verification.getOperationId();
             } else {
-                String result = "НЕДОСТАТОЧНО СРЕДСТВ ДЛЯ ОПЕРАЦИИ";
-                logBuilder.setResult(result);
-                throw new InvalidTransactionExceptions(result);
+                logBuilder.setResult("НЕДОСТАТОЧНО СРЕДСТВ ДЛЯ ОПЕРАЦИИ");
+                throw new InvalidTransactionExceptions(logBuilder.getResult());
             }
         } else {
             throw new InvalidTransactionExceptions("Такой операции нет");
