@@ -1,9 +1,12 @@
 package sobinda.moneybysobin.model;
 
+import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.NotNull;
 
 public class Verification {
     @NotNull
+    @NotBlank
+
     private String code;
     private String operationId;
 

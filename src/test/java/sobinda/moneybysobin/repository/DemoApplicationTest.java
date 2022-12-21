@@ -16,6 +16,9 @@ import sobinda.moneybysobin.model.Verification;
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 @Testcontainers
 public class DemoApplicationTest {
+    final String NAME_LOCAL = "http://192.168.99.100:";
+//  final String NAME_LOCAL = "http://localhost:";
+
     @Autowired
     TestRestTemplate restTemplate;
 
@@ -36,12 +39,12 @@ public class DemoApplicationTest {
         Verification verification = new Verification("0000", "1");
 
         ResponseEntity<String> forEntity = restTemplate.postForEntity(
-                "http://localhost:" + appMoney.getMappedPort(5500) + "/transfer", request, String.class);
+                NAME_LOCAL + appMoney.getMappedPort(5500) + "/transfer", request, String.class);
         System.out.println(forEntity.getBody());
         Assertions.assertEquals("Ожидаем подтверждение на перевод операции №1", forEntity.getBody());
 
         ResponseEntity<String> forEntitySecond = restTemplate.postForEntity(
-                "http://localhost:" + appMoney.getMappedPort(5500) + "/confirmOperation", verification, String.class);
+                NAME_LOCAL + appMoney.getMappedPort(5500) + "/confirmOperation", verification, String.class);
         System.out.println(forEntitySecond.getBody());
         Assertions.assertEquals("Успешная транзакция №1", forEntitySecond.getBody());
     }

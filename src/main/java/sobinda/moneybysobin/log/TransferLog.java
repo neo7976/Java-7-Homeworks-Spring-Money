@@ -56,6 +56,7 @@ public class TransferLog {
                 logBuilder.getResult()
         );
         writeLog(s);
+        System.out.println(s);
         return operationId;
     }
 
