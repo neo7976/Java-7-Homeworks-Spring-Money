@@ -59,24 +59,18 @@ public class TransferRepository {
         int sumResult = commission.getValue() + amount.getValue();
 
         // пишем проверку баланса и перевод денег
-        LogBuilder logBuilder;
+        LogBuilder logBuilder = new LogBuilder()
+                .setCardNumberFrom(cardFrom.getCardNumber())
+                .setCardNumberTo(cardNumberTo)
+                .setAmount(amount)
+                .setCommission(commission);
         if (balanceFrom >= sumResult) {
-            logBuilder = new LogBuilder()
-                    .setCardNumberFrom(cardFrom.getCardNumber())
-                    .setCardNumberTo(cardNumberTo)
-                    .setAmount(amount)
-                    .setCommission(commission)
-                    .setResult("ЗАПРОС НА ПЕРЕВОД");
+            logBuilder.setResult("ЗАПРОС НА ПЕРЕВОД");
             String operationId = transferLog.log(logBuilder);
             cardTransactionsWaitConfirmOperation.put(operationId, new Operation(logBuilder));
             return "Ожидаем подтверждение на перевод операции №" + operationId;
         } else {
-            logBuilder = new LogBuilder()
-                    .setCardNumberFrom(cardFrom.getCardNumber())
-                    .setCardNumberTo(cardNumberTo)
-                    .setAmount(amount)
-                    .setCommission(commission)
-                    .setResult("НЕДОСТАТОЧНО СРЕДСТВ ДЛЯ ОПЕРАЦИИ");
+            logBuilder.setResult("НЕДОСТАТОЧНО СРЕДСТВ ДЛЯ ОПЕРАЦИИ");
             transferLog.log(logBuilder);
             throw new InvalidTransactionExceptions(logBuilder.getResult());
         }
@@ -121,19 +115,26 @@ public class TransferRepository {
         if (verification.getCode().equals(operation.getSecretCode())) {
             System.out.println("СЕКРЕТНЫЙ КОД СОВПАДАЕТ");
             int balanceFrom = mapStorage.get(operation.getCardFromNumber()).getAmount().getValue();
-            mapStorage.get(operation.getCardFromNumber()).getAmount().setValue(balanceFrom - operation.getAmount().getValue() - operation.getCommission().getValue());
-            int balanceTo = mapStorage.get(operation.getCardToNumber()).getAmount().getValue();
-            mapStorage.get(operation.getCardToNumber()).getAmount().setValue(balanceTo + operation.getAmount().getValue());
+            int sumResult = operation.getCommission().getValue() + operation.getAmount().getValue();
             LogBuilder logBuilder = new LogBuilder()
                     .setCardNumberFrom(operation.getCardFromNumber())
                     .setCardNumberTo(operation.getCardToNumber())
                     .setAmount(operation.getAmount())
-                    .setCommission(operation.getCommission())
-                    .setResult(String.format("ТРАНЗАКЦИЯ ПРОШЛА УСПЕШНО! ВАШ БАЛАНС СОСТАВЛЯЕТ: %.2f %s",
-                            (double) mapStorage.get(operation.getCardFromNumber()).getAmount().getValue() / 100,
-                            operation.getAmount().getCurrency()));
-            transferLog.log(logBuilder);
-            return "Успешная транзакция №" + verification.getOperationId();
+                    .setCommission(operation.getCommission());
+            if (balanceFrom >= sumResult) {
+                mapStorage.get(operation.getCardFromNumber()).getAmount().setValue(balanceFrom - sumResult);
+                int balanceTo = mapStorage.get(operation.getCardToNumber()).getAmount().getValue();
+                mapStorage.get(operation.getCardToNumber()).getAmount().setValue(balanceTo + operation.getAmount().getValue());
+                logBuilder.setResult(String.format("ТРАНЗАКЦИЯ ПРОШЛА УСПЕШНО! ВАШ БАЛАНС СОСТАВЛЯЕТ: %.2f %s",
+                        (double) mapStorage.get(operation.getCardFromNumber()).getAmount().getValue() / 100,
+                        operation.getAmount().getCurrency()));
+                transferLog.log(logBuilder);
+                return "Успешная транзакция №" + verification.getOperationId();
+            } else {
+                String result = "НЕДОСТАТОЧНО СРЕДСТВ ДЛЯ ОПЕРАЦИИ";
+                logBuilder.setResult(result);
+                throw new InvalidTransactionExceptions(result);
+            }
         } else {
             throw new InvalidTransactionExceptions("Такой операции нет");
         }
