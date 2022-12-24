@@ -16,8 +16,8 @@ import sobinda.moneybysobin.model.Verification;
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 @Testcontainers
 public class DemoApplicationTest {
-    final String NAME_LOCAL = "http://192.168.99.100:";
-//  final String NAME_LOCAL = "http://localhost:";
+//    final String NAME_LOCAL = "http://192.168.99.100:";
+  final String NAME_LOCAL = "http://localhost:";
 
     @Autowired
     TestRestTemplate restTemplate;
