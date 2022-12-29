@@ -2,6 +2,7 @@ package sobinda.moneybysobin.service;
 
 import org.springframework.stereotype.Service;
 import sobinda.moneybysobin.exceptions.InvalidTransactionExceptions;
+import sobinda.moneybysobin.log.TransferLog;
 import sobinda.moneybysobin.model.Card;
 import sobinda.moneybysobin.model.CardTransfer;
 import sobinda.moneybysobin.model.Amount;
@@ -11,9 +12,14 @@ import sobinda.moneybysobin.repository.TransferRepository;
 @Service
 public class TransferService {
     TransferRepository transferRepository;
+    //1%
+    private final int COMMISSION = 100;
+    private final String SECRET_CODE = "0000";
+    private TransferLog transferLog;
 
     public TransferService(TransferRepository transferRepository) {
         this.transferRepository = transferRepository;
+        this.transferLog = TransferLog.getInstance();
     }
 
     public String transferMoneyCardToCard(CardTransfer cardTransfer) throws InvalidTransactionExceptions {

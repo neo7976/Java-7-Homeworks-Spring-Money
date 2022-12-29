@@ -18,13 +18,11 @@ import java.util.stream.Stream;
 
 @Repository
 public class TransferRepository {
-    TransferLog transferLog;
-    Map<String, Card> mapStorage;
+    private Map<String, Card> mapStorage;
     private final ConcurrentHashMap<String, Operation> cardTransactionsWaitConfirmOperation;
 
-    //1%
-    private final int COMMISSION = 100;
-    private final String SECRET_CODE = "0000";
+
+
 
     Map<String, Card> map = Stream.of(
                     new AbstractMap.SimpleEntry<>(
@@ -46,7 +44,6 @@ public class TransferRepository {
 
     public TransferRepository() {
         this.mapStorage = new ConcurrentHashMap<>(map);
-        this.transferLog = TransferLog.getInstance();
         cardTransactionsWaitConfirmOperation = new ConcurrentHashMap<>();
     }
 
