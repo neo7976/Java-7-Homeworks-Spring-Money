@@ -1,11 +1,10 @@
 package sobinda.moneybysobin.log;
 
-import sobinda.moneybysobin.model.Operation;
-
 import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.concurrent.ConcurrentHashMap;
@@ -49,9 +48,9 @@ public class TransferLog {
                 cardTransactions.get(logBuilder.getCardNumberFrom()),
                 logBuilder.getCardNumberFrom(),
                 logBuilder.getCardNumberTo(),
-                (double) logBuilder.getAmount().getValue() / 100,
+                logBuilder.getAmount().getValue().divide(new BigDecimal(100)),
                 logBuilder.getAmount().getCurrency(),
-                (double) logBuilder.getCommission().getValue() / 100,
+                logBuilder.getCommission().getValue().divide(new BigDecimal(100)),
                 logBuilder.getCommission().getCurrency(),
                 logBuilder.getResult()
         );

@@ -14,6 +14,7 @@ import sobinda.moneybysobin.model.Amount;
 import sobinda.moneybysobin.model.Card;
 import sobinda.moneybysobin.model.Verification;
 
+import java.math.BigDecimal;
 import java.util.regex.Matcher;
 import java.util.stream.Stream;
 
@@ -44,10 +45,10 @@ class TransferRepositoryTest {
         return Stream.of(
                 Arguments.of(card1,
                         card2.getCardNumber(),
-                        new Amount(500_00, "RUR"), "1", new Verification("0000", "1")),
+                        new Amount(new BigDecimal(500_00), "RUR"), "1", new Verification("0000", "1")),
                 Arguments.of(card2,
                         card1.getCardNumber(),
-                        new Amount(1000_00, "RUR"), "3", new Verification("0000", "3"))
+                        new Amount(new BigDecimal(1000_00), "RUR"), "3", new Verification("0000", "3"))
         );
     }
 

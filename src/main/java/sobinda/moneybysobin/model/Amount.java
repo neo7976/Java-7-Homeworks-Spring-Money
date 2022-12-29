@@ -1,10 +1,12 @@
 package sobinda.moneybysobin.model;
 
+import java.math.BigDecimal;
+
 public class Amount {
-    private int value;
+    private BigDecimal value;
     private String currency;
 
-    public Amount(int value, String currency) {
+    public Amount(BigDecimal value, String currency) {
         this.value = value;
         this.currency = currency;
     }
@@ -20,16 +22,17 @@ public class Amount {
         this.currency = currency;
     }
 
-    public int getValue() {
+    public BigDecimal getValue() {
         return value;
     }
-    public void setValue(int value) {
+
+    public void setValue(BigDecimal value) {
         this.value = value;
     }
 
     @Override
     public String toString() {
-        return String.format("[%d %s]", value, currency);
+        return String.format("[%.2f %s]", value, currency);
     }
 }
 

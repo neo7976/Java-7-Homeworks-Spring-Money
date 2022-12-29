@@ -13,6 +13,8 @@ import sobinda.moneybysobin.model.Amount;
 import sobinda.moneybysobin.model.CardTransfer;
 import sobinda.moneybysobin.model.Verification;
 
+import java.math.BigDecimal;
+
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 @Testcontainers
 public class DemoApplicationTest {
@@ -33,7 +35,7 @@ public class DemoApplicationTest {
                 "08/23",
                 "351",
                 "4558445885585555",
-                new Amount(50000, "RUR")
+                new Amount(new BigDecimal(50000), "RUR")
         );
 
         Verification verification = new Verification("0000", "1");

@@ -9,6 +9,7 @@ import sobinda.moneybysobin.model.Card;
 import sobinda.moneybysobin.model.Operation;
 import sobinda.moneybysobin.model.Verification;
 
+import java.math.BigDecimal;
 import java.util.AbstractMap;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
@@ -32,14 +33,14 @@ public class TransferRepository {
                                     "4558445885584747",
                                     "08/23",
                                     "351",
-                                    new Amount(50_000_00, "RUR"))),
+                                    new Amount(new BigDecimal(50_000_00), "RUR"))),
                     new AbstractMap.SimpleEntry<>(
                             "4558445885585555",
                             new Card(
                                     "4558445885585555",
                                     "08/23",
                                     "352",
-                                    new Amount(25_000_00, "RUR")))
+                                    new Amount(new BigDecimal(25_000_00), "RUR")))
             )
             .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
 
@@ -54,9 +55,9 @@ public class TransferRepository {
         validCardToBase(cardFrom, cardNumberTo);
         validCurrencyCardTo(cardNumberTo, amount);
 
-        int balanceFrom = mapStorage.get(cardFrom.getCardNumber()).getAmount().getValue();
-        Amount commission = new Amount(amount.getValue() / COMMISSION, amount.getCurrency());
-        int sumResult = commission.getValue() + amount.getValue();
+        BigDecimal balanceFrom = mapStorage.get(cardFrom.getCardNumber()).getAmount().getValue();
+        Amount commission = new Amount(amount.getValue().divide(BigDecimal.valueOf(COMMISSION)), amount.getCurrency());
+        BigDecimal sumResult = commission.getValue().add(amount.getValue());
 
         // пишем проверку баланса и перевод денег
         LogBuilder logBuilder = new LogBuilder()
@@ -64,7 +65,7 @@ public class TransferRepository {
                 .setCardNumberTo(cardNumberTo)
                 .setAmount(amount)
                 .setCommission(commission);
-        if (balanceFrom >= sumResult) {
+        if (balanceFrom.compareTo(sumResult) >= 1) {
             logBuilder.setResult("ЗАПРОС НА ПЕРЕВОД");
             String operationId = transferLog.log(logBuilder);
             cardTransactionsWaitConfirmOperation.put(operationId, new Operation(logBuilder));
@@ -114,19 +115,19 @@ public class TransferRepository {
     private String operationWithMoney(Verification verification, Operation operation) throws InvalidTransactionExceptions {
         if (verification.getCode().equals(operation.getSecretCode())) {
             System.out.println("СЕКРЕТНЫЙ КОД СОВПАДАЕТ");
-            int balanceFrom = mapStorage.get(operation.getCardFromNumber()).getAmount().getValue();
-            int sumResult = operation.getCommission().getValue() + operation.getAmount().getValue();
+            BigDecimal balanceFrom = mapStorage.get(operation.getCardFromNumber()).getAmount().getValue();
+            BigDecimal sumResult = operation.getCommission().getValue().add(operation.getAmount().getValue());
             LogBuilder logBuilder = new LogBuilder()
                     .setCardNumberFrom(operation.getCardFromNumber())
                     .setCardNumberTo(operation.getCardToNumber())
                     .setAmount(operation.getAmount())
                     .setCommission(operation.getCommission());
-            if (balanceFrom >= sumResult) {
-                mapStorage.get(operation.getCardFromNumber()).getAmount().setValue(balanceFrom - sumResult);
-                int balanceTo = mapStorage.get(operation.getCardToNumber()).getAmount().getValue();
-                mapStorage.get(operation.getCardToNumber()).getAmount().setValue(balanceTo + operation.getAmount().getValue());
+            if (balanceFrom.compareTo(sumResult) >= 1) {
+                mapStorage.get(operation.getCardFromNumber()).getAmount().setValue(balanceFrom.subtract(sumResult));
+                BigDecimal balanceTo = mapStorage.get(operation.getCardToNumber()).getAmount().getValue();
+                mapStorage.get(operation.getCardToNumber()).getAmount().setValue(balanceTo.add(operation.getAmount().getValue()));
                 logBuilder.setResult(String.format("ТРАНЗАКЦИЯ ПРОШЛА УСПЕШНО! ВАШ БАЛАНС СОСТАВЛЯЕТ: %.2f %s",
-                        (double) mapStorage.get(operation.getCardFromNumber()).getAmount().getValue() / 100,
+                        mapStorage.get(operation.getCardFromNumber()).getAmount().getValue().divide(new BigDecimal(100)),
                         operation.getAmount().getCurrency()));
                 transferLog.log(logBuilder);
                 return "Успешная транзакция №" + verification.getOperationId();
