@@ -85,15 +85,26 @@ public class TransferService {
                     .setCommission(operation.getCommission());
             if (balanceFrom.compareTo(sumResult) >= 0) {
                 //устанавливаем новый баланс на нашу исходную карту
-                transferRepository.getMapStorage().get(operation.getCardFromNumber()).getAmount().setValue(balanceFrom.subtract(sumResult));
+                transferRepository.getMapStorage().get(operation.getCardFromNumber())
+                        .getAmount()
+                        .setValue(
+                                balanceFrom.subtract(sumResult)
+                        );
                 BigDecimal balanceTo = transferRepository.getMapStorage().get(operation.getCardToNumber()).getAmount().getValue();
 
                 //устанавливаем новый баланс на карту перевода
-                transferRepository.getMapStorage().get(operation.getCardToNumber()).getAmount().setValue(balanceTo.add(operation.getAmount().getValue()));
+                transferRepository.getMapStorage().get(operation.getCardToNumber())
+                        .getAmount()
+                        .setValue(balanceTo.add(operation.getAmount().getValue()
+                        ));
                 logBuilder.setResult(String.format("ТРАНЗАКЦИЯ ПРОШЛА УСПЕШНО! ВАШ БАЛАНС СОСТАВЛЯЕТ: %.2f %s",
                         transferRepository.getMapStorage().get(operation.getCardFromNumber()).getAmount().getValue().divide(new BigDecimal(100)),
                         operation.getAmount().getCurrency()));
                 transferLog.log(logBuilder);
+                //todo удалить заглушку и сделать для всех операций удаление, когда будем получать с front id операции
+                if (verification.getOperationId() != null) {
+                    transferRepository.deleteWaitOperation(verification.getOperationId());
+                }
                 return "Успешная транзакция №" + verification.getOperationId();
             } else {
                 logBuilder.setResult("НЕДОСТАТОЧНО СРЕДСТВ ДЛЯ ОПЕРАЦИИ");

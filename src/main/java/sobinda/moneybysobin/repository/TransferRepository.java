@@ -95,4 +95,8 @@ public class TransferRepository {
     public void setCardTransactionsWaitConfirmOperation(String id, Operation operation) {
         cardTransactionsWaitConfirmOperation.put(id, operation);
     }
+
+    public void deleteWaitOperation(String operationId) {
+        cardTransactionsWaitConfirmOperation.remove(operationId);
+    }
 }

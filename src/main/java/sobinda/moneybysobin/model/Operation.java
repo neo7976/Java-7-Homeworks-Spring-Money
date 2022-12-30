@@ -17,6 +17,7 @@ public class Operation {
         this.cardToNumber = logBuilder.getCardNumberTo();
         this.amount = logBuilder.getAmount();
         this.commission = logBuilder.getCommission();
+        //todo сейчас front создает только 0000, потом сделать генерацию
         this.secretCode = "0000";
     }
 
