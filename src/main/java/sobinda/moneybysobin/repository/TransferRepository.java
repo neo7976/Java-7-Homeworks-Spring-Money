@@ -10,18 +10,17 @@ import sobinda.moneybysobin.model.Operation;
 import sobinda.moneybysobin.model.Verification;
 
 import java.math.BigDecimal;
-import java.util.AbstractMap;
-import java.util.Map;
+import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 @Repository
 public class TransferRepository {
+    private final AtomicInteger id = new AtomicInteger(0);
     private Map<String, Card> mapStorage;
-    private final ConcurrentHashMap<String, Operation> cardTransactionsWaitConfirmOperation;
-
-
+    private ConcurrentHashMap<String, Operation> cardTransactionsWaitConfirmOperation;
 
 
     Map<String, Card> map = Stream.of(
@@ -52,26 +51,7 @@ public class TransferRepository {
         validCardToBase(cardFrom, cardNumberTo);
         validCurrencyCardTo(cardNumberTo, amount);
 
-        BigDecimal balanceFrom = mapStorage.get(cardFrom.getCardNumber()).getAmount().getValue();
-        Amount commission = new Amount(amount.getValue().divide(BigDecimal.valueOf(COMMISSION)), amount.getCurrency());
-        BigDecimal sumResult = commission.getValue().add(amount.getValue());
-
-        // пишем проверку баланса и перевод денег
-        LogBuilder logBuilder = new LogBuilder()
-                .setCardNumberFrom(cardFrom.getCardNumber())
-                .setCardNumberTo(cardNumberTo)
-                .setAmount(amount)
-                .setCommission(commission);
-        if (balanceFrom.compareTo(sumResult) >= 1) {
-            logBuilder.setResult("ЗАПРОС НА ПЕРЕВОД");
-            String operationId = transferLog.log(logBuilder);
-            cardTransactionsWaitConfirmOperation.put(operationId, new Operation(logBuilder));
-            return "Ожидаем подтверждение на перевод операции №" + operationId;
-        } else {
-            logBuilder.setResult("НЕДОСТАТОЧНО СРЕДСТВ ДЛЯ ОПЕРАЦИИ");
-            transferLog.log(logBuilder);
-            throw new InvalidTransactionExceptions(logBuilder.getResult());
-        }
+        return String.valueOf(id.incrementAndGet());
     }
 
     public void validCardToBase(Card cardFrom, String cardNumberTo) throws InvalidTransactionExceptions {
@@ -91,49 +71,28 @@ public class TransferRepository {
         }
     }
 
-    public String confirmOperation(Verification verification) throws InvalidTransactionExceptions {
-        //todo убрать null, когда сможем получать id c front
-        Operation operation;
+    public List<Operation> confirmOperation(Verification verification) throws InvalidTransactionExceptions {
+        //todo убрать null и переделать из списка просто в операцию, когда сможем получать id c front
         if (verification.getOperationId() == null) {
             System.out.println("Сработала заглушка");
-            for (Map.Entry<String, Operation> entry : cardTransactionsWaitConfirmOperation.entrySet()) {
-                operation = entry.getValue();
-                return operationWithMoney(verification, operation);
-            }
+            return new ArrayList<>(cardTransactionsWaitConfirmOperation.values());
         } else if (cardTransactionsWaitConfirmOperation.containsKey(verification.getOperationId())) {
             System.out.println("Найдена операция на очередь об оплате");
-            operation = cardTransactionsWaitConfirmOperation.get(verification.getOperationId());
-            return operationWithMoney(verification, operation);
+            return Collections.singletonList(cardTransactionsWaitConfirmOperation.get(verification.getOperationId()));
         }
         //выбросить ошибку в сервисе или репозитории и удалить временные данные
         throw new InvalidTransactionExceptions("Ошибочка, такого мы не предвидели!");
     }
 
-    private String operationWithMoney(Verification verification, Operation operation) throws InvalidTransactionExceptions {
-        if (verification.getCode().equals(operation.getSecretCode())) {
-            System.out.println("СЕКРЕТНЫЙ КОД СОВПАДАЕТ");
-            BigDecimal balanceFrom = mapStorage.get(operation.getCardFromNumber()).getAmount().getValue();
-            BigDecimal sumResult = operation.getCommission().getValue().add(operation.getAmount().getValue());
-            LogBuilder logBuilder = new LogBuilder()
-                    .setCardNumberFrom(operation.getCardFromNumber())
-                    .setCardNumberTo(operation.getCardToNumber())
-                    .setAmount(operation.getAmount())
-                    .setCommission(operation.getCommission());
-            if (balanceFrom.compareTo(sumResult) >= 1) {
-                mapStorage.get(operation.getCardFromNumber()).getAmount().setValue(balanceFrom.subtract(sumResult));
-                BigDecimal balanceTo = mapStorage.get(operation.getCardToNumber()).getAmount().getValue();
-                mapStorage.get(operation.getCardToNumber()).getAmount().setValue(balanceTo.add(operation.getAmount().getValue()));
-                logBuilder.setResult(String.format("ТРАНЗАКЦИЯ ПРОШЛА УСПЕШНО! ВАШ БАЛАНС СОСТАВЛЯЕТ: %.2f %s",
-                        mapStorage.get(operation.getCardFromNumber()).getAmount().getValue().divide(new BigDecimal(100)),
-                        operation.getAmount().getCurrency()));
-                transferLog.log(logBuilder);
-                return "Успешная транзакция №" + verification.getOperationId();
-            } else {
-                logBuilder.setResult("НЕДОСТАТОЧНО СРЕДСТВ ДЛЯ ОПЕРАЦИИ");
-                throw new InvalidTransactionExceptions(logBuilder.getResult());
-            }
-        } else {
-            throw new InvalidTransactionExceptions("Такой операции нет");
-        }
+    public Map<String, Card> getMapStorage() {
+        return mapStorage;
+    }
+
+    public void setMapStorage(String cardNumber, Card card) {
+        mapStorage.put(cardNumber, card);
+    }
+
+    public void setCardTransactionsWaitConfirmOperation(String id, Operation operation) {
+        cardTransactionsWaitConfirmOperation.put(id, operation);
     }
 }

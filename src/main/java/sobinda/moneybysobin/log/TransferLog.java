@@ -31,7 +31,7 @@ public class TransferLog {
         return INSTANCE;
     }
 
-    public String log(LogBuilder logBuilder) {
+    public void log(LogBuilder logBuilder) {
         String operationId = String.valueOf(num.incrementAndGet());
         cardTransactions.put(logBuilder.getCardNumberFrom(), cardTransactions.getOrDefault(logBuilder.getCardNumberFrom(), 0) + 1);
         String s = String.format(
@@ -56,7 +56,6 @@ public class TransferLog {
         );
         writeLog(s);
         System.out.println(s);
-        return operationId;
     }
 
     public void writeLog(String s) {

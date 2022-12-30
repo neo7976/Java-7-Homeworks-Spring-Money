@@ -5,11 +5,21 @@ import sobinda.moneybysobin.model.Amount;
 import javax.validation.constraints.NotBlank;
 
 public class LogBuilder {
+    private String operationId;
     private String cardNumberFrom;
     private String cardNumberTo;
     private Amount amount;
     private Amount commission;
     private String result;
+
+    public String getOperationId() {
+        return operationId;
+    }
+
+    public LogBuilder setOperationId(String operationId) {
+        this.operationId = operationId;
+        return this;
+    }
 
     public LogBuilder setCardNumberFrom(String cardNumberFrom) {
         this.cardNumberFrom = cardNumberFrom;
