@@ -3,6 +3,7 @@ package sobinda.moneybysobin.model;
 import sobinda.moneybysobin.log.LogBuilder;
 
 import javax.validation.constraints.NotNull;
+import java.util.Objects;
 
 public class Operation {
     private String cardFromNumber;
@@ -59,11 +60,23 @@ public class Operation {
 
     @Override
     public String toString() {
-        return "Operation{" +
-                "cardFromNumber='" + cardFromNumber + '\'' +
+        return "cardFromNumber='" + cardFromNumber + '\'' +
                 ", cardToNumber='" + cardToNumber + '\'' +
                 ", amount=" + amount +
                 ", commission=" + commission +
                 '}';
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        Operation operation = (Operation) o;
+        return Objects.equals(cardFromNumber, operation.cardFromNumber) && Objects.equals(cardToNumber, operation.cardToNumber) && Objects.equals(amount, operation.amount) && Objects.equals(commission, operation.commission) && Objects.equals(secretCode, operation.secretCode);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(cardFromNumber, cardToNumber, amount, commission, secretCode);
     }
 }

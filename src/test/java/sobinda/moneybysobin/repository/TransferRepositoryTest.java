@@ -1,5 +1,6 @@
 package sobinda.moneybysobin.repository;
 
+import lombok.SneakyThrows;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
@@ -7,15 +8,15 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
-import org.testcontainers.shaded.org.hamcrest.MatcherAssert;
-import org.testcontainers.shaded.org.hamcrest.Matchers;
 import sobinda.moneybysobin.exceptions.InvalidTransactionExceptions;
+import sobinda.moneybysobin.log.LogBuilder;
 import sobinda.moneybysobin.model.Amount;
 import sobinda.moneybysobin.model.Card;
+import sobinda.moneybysobin.model.Operation;
 import sobinda.moneybysobin.model.Verification;
 
 import java.math.BigDecimal;
-import java.util.regex.Matcher;
+import java.util.List;
 import java.util.stream.Stream;
 
 class TransferRepositoryTest {
@@ -45,20 +46,46 @@ class TransferRepositoryTest {
         return Stream.of(
                 Arguments.of(card1,
                         card2.getCardNumber(),
-                        new Amount(new BigDecimal(500_00), "RUR"), "1", new Verification("0000", "1")),
+                        new Amount(new BigDecimal(500_00), "RUR")),
                 Arguments.of(card2,
                         card1.getCardNumber(),
-                        new Amount(new BigDecimal(1000_00), "RUR"), "3", new Verification("0000", "3"))
+                        new Amount(new BigDecimal(1000_00), "RUR"))
         );
     }
 
     @ParameterizedTest
     @MethodSource("sourceTransfer")
-    void transferMoneyCardToCardTest(Card cardFrom, String cardNumberTo, Amount amount, String number, Verification verification) throws InvalidTransactionExceptions {
-        Assertions.assertEquals("Ожидаем подтверждение на перевод операции №" + number,
+    void transferMoneyCardToCardTest(Card cardFrom, String cardNumberTo, Amount amount) throws InvalidTransactionExceptions {
+        Assertions.assertEquals("1",
                 transferRepository.transferMoneyCardToCard(cardFrom, cardNumberTo, amount));
-        Assertions.assertEquals("Успешная транзакция №" + verification.getOperationId(), transferRepository.confirmOperation(verification));
     }
+
+    public static Stream<Arguments> confirmOperation() {
+        return Stream.of(
+                Arguments.of(new LogBuilder().setOperationId("1")
+                        .setAmount(new Amount(BigDecimal.valueOf(500_00), "RUR"))
+                        .setCommission(new Amount(BigDecimal.valueOf(5_00), "RUR"))
+                        .setCardNumberFrom("4558445885584747")
+                        .setCardNumberTo("4558445885585555")
+                ),
+                Arguments.of(new LogBuilder().setOperationId("1")
+                        .setAmount(new Amount(BigDecimal.valueOf(5_000_00), "RUR"))
+                        .setCommission(new Amount(BigDecimal.valueOf(50_00), "RUR"))
+                        .setCardNumberTo("4558445885584747")
+                        .setCardNumberFrom("4558445885585555")
+                )
+        );
+    }
+
+    @SneakyThrows
+    @ParameterizedTest
+    @MethodSource("confirmOperation")
+    void confirmOperationTest(LogBuilder logBuilder) {
+        transferRepository.setCardTransactionsWaitConfirmOperation(logBuilder.getOperationId(), new Operation(logBuilder));
+        Assertions.assertEquals(List.of(new Operation(logBuilder)),
+                transferRepository.confirmOperation(new Verification("0000", "1")));
+    }
+
 
     @Test
     void validCardToBaseTestFirst() {
@@ -72,7 +99,7 @@ class TransferRepositoryTest {
         return Stream.of(
                 Arguments.of(card1.getCardNumber(), "11/22", card1.getCardCVV(), card2.getCardNumber()),
                 Arguments.of(card1.getCardNumber(), card1.getCardValidTill(), "111", card2.getCardNumber())
-                );
+        );
     }
 
     @ParameterizedTest
