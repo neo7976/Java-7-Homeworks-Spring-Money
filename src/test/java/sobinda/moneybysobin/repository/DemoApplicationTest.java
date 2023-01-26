@@ -9,7 +9,7 @@ import org.springframework.http.ResponseEntity;
 import org.testcontainers.containers.GenericContainer;
 import org.testcontainers.junit.jupiter.Container;
 import org.testcontainers.junit.jupiter.Testcontainers;
-import sobinda.moneybysobin.model.Amount;
+import sobinda.moneybysobin.entity.Amount;
 import sobinda.moneybysobin.model.CardTransfer;
 import sobinda.moneybysobin.model.Verification;
 

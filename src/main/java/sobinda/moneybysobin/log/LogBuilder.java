@@ -1,8 +1,6 @@
 package sobinda.moneybysobin.log;
 
-import sobinda.moneybysobin.model.Amount;
-
-import javax.validation.constraints.NotBlank;
+import sobinda.moneybysobin.entity.Amount;
 
 public class LogBuilder {
     private String operationId;

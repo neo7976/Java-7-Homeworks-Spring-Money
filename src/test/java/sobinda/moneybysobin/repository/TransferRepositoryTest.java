@@ -10,9 +10,9 @@ import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
 import sobinda.moneybysobin.exceptions.InvalidTransactionExceptions;
 import sobinda.moneybysobin.log.LogBuilder;
-import sobinda.moneybysobin.model.Amount;
-import sobinda.moneybysobin.model.Card;
-import sobinda.moneybysobin.model.Operation;
+import sobinda.moneybysobin.entity.Amount;
+import sobinda.moneybysobin.entity.Card;
+import sobinda.moneybysobin.entity.Operation;
 import sobinda.moneybysobin.model.Verification;
 
 import java.math.BigDecimal;

@@ -1,4 +1,4 @@
-package sobinda.moneybysobin.model;
+package sobinda.moneybysobin.entity;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;

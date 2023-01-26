@@ -1,17 +1,33 @@
-package sobinda.moneybysobin.model;
+package sobinda.moneybysobin.entity;
 
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Data;
+import lombok.NoArgsConstructor;
 import sobinda.moneybysobin.log.LogBuilder;
 
-import javax.validation.constraints.NotNull;
+import javax.persistence.*;
 import java.util.Objects;
 
+@Data
+@Entity
+@NoArgsConstructor
+@AllArgsConstructor
+@Builder
 public class Operation {
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Integer id;
+    @Column(name = "Number_From_Card", length = 16)
     private String cardFromNumber;
+    @Column(name = "Number_To_Card", length = 16)
     private String cardToNumber;
+    @Embedded
     private Amount amount;
+    @Embedded
     private Amount commission;
     //Сделать генерацию кода, когда будет возможность отправить код и принять его через форму в front
-    private final String secretCode;
+    private String secretCode;
 
     public Operation(LogBuilder logBuilder) {
         this.cardFromNumber = logBuilder.getCardNumberFrom();
@@ -20,42 +36,6 @@ public class Operation {
         this.commission = logBuilder.getCommission();
         //todo сейчас front создает только 0000, потом сделать генерацию
         this.secretCode = "0000";
-    }
-
-    public String getCardFromNumber() {
-        return cardFromNumber;
-    }
-
-    public void setCardFromNumber(String cardFromNumber) {
-        this.cardFromNumber = cardFromNumber;
-    }
-
-    public String getCardToNumber() {
-        return cardToNumber;
-    }
-
-    public void setCardToNumber(String cardToNumber) {
-        this.cardToNumber = cardToNumber;
-    }
-
-    public Amount getAmount() {
-        return amount;
-    }
-
-    public void setAmount(Amount amount) {
-        this.amount = amount;
-    }
-
-    public Amount getCommission() {
-        return commission;
-    }
-
-    public void setCommission(Amount commission) {
-        this.commission = commission;
-    }
-
-    public String getSecretCode() {
-        return secretCode;
     }
 
     @Override

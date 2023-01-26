@@ -1,7 +1,6 @@
 package sobinda.moneybysobin.model;
 
-import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
-import com.fasterxml.jackson.annotation.JsonProperty;
+import sobinda.moneybysobin.entity.Amount;
 
 import javax.validation.constraints.NotNull;
 
