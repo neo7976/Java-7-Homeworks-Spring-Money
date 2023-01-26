@@ -7,6 +7,7 @@ import sobinda.moneybysobin.log.TransferLog;
 import sobinda.moneybysobin.model.*;
 import sobinda.moneybysobin.repository.TransferRepository;
 
+import javax.transaction.Transactional;
 import java.math.BigDecimal;
 import java.util.List;
 
@@ -23,6 +24,7 @@ public class TransferService {
         this.transferLog = TransferLog.getInstance();
     }
 
+    @Transactional
     public String transferMoneyCardToCard(CardTransfer cardTransfer) throws InvalidTransactionExceptions {
         Card cardFrom = new Card(
                 cardTransfer.getCardFromNumber(),
@@ -62,7 +64,7 @@ public class TransferService {
         }
     }
 
-
+    @Transactional
     public String confirmOperation(Verification verification) throws InvalidTransactionExceptions {
         List<Operation> operations = transferRepository.confirmOperation(verification);
         for (Operation operation : operations) {
@@ -70,7 +72,6 @@ public class TransferService {
         }
         throw new InvalidTransactionExceptions("Ошибочка, такого мы не предвидели!");
     }
-
 
     private String operationWithMoney(Verification verification, Operation operation) throws InvalidTransactionExceptions {
         if (verification.getCode().equals(operation.getSecretCode())) {

@@ -1,7 +1,5 @@
 package sobinda.moneybysobin.model;
 
-import jdk.jfr.Enabled;
-import jdk.jfr.Name;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -43,37 +41,6 @@ public class Card {
         this.cardValidTill = cardValidTill;
         this.cardCVV = cardCVV;
     }
-//    public String getCardNumber() {
-//        return cardNumber;
-//    }
-//
-//    public void setCardNumber(String cardNumber) {
-//        this.cardNumber = cardNumber;
-//    }
-//
-//    public String getCardValidTill() {
-//        return cardValidTill;
-//    }
-//
-//    public void setCardValidTill(String cardValidTill) {
-//        this.cardValidTill = cardValidTill;
-//    }
-//
-//    public String getCardCVV() {
-//        return cardCVV;
-//    }
-//
-//    public void setCardCVV(String cardCVV) {
-//        this.cardCVV = cardCVV;
-//    }
-//
-//    public Amount getAmount() {
-//        return amount;
-//    }
-//
-//    public void setAmount(Amount amount) {
-//        this.amount = amount;
-//    }
 
     @Override
     public String toString() {
@@ -83,7 +50,6 @@ public class Card {
                 cardCVV,
                 amount);
     }
-
 
     @Override
     public boolean equals(Object o) {
