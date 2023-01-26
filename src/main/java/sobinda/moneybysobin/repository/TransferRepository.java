@@ -7,6 +7,7 @@ import sobinda.moneybysobin.model.Card;
 import sobinda.moneybysobin.model.Operation;
 import sobinda.moneybysobin.model.Verification;
 
+import java.math.BigDecimal;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -62,7 +63,7 @@ public class TransferRepository {
         if (cardRepository.findByCardNumber(cardNumberTo).isEmpty() || cardRepository.findByCardNumber(cardFrom.getCardNumber()).isEmpty()) {
             throw new InvalidTransactionExceptions("Одной из карт нет в базе данных");
         }
-        if (!cardRepository.findByCardNumber(cardFrom.getCardNumber()).equals(cardFrom)) {
+        if (!cardRepository.findByCardNumber(cardFrom.getCardNumber()).get().equals(cardFrom)) {
             throw new InvalidTransactionExceptions("Ошибка в доступе к карте списания");
         }
     }
@@ -107,5 +108,12 @@ public class TransferRepository {
 
     public void deleteWaitOperation(String operationId) {
         cardTransactionsWaitConfirmOperation.remove(operationId);
+    }
+    public Optional<BigDecimal> findByCardNumberAndAmountValue(String cardNumber) {
+       return cardRepository.findByCardNumberAndAmountValue(cardNumber);
+    }
+
+    public void setBalanceCard(String cardNumber, BigDecimal bigDecimal) {
+        cardRepository.setBalanceCard(cardNumber, bigDecimal);
     }
 }

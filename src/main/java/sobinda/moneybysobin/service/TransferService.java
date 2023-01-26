@@ -39,7 +39,7 @@ public class TransferService {
         }
         String operationId = transferRepository.transferMoneyCardToCard(cardFrom, cardToNumber, amount);
 
-        BigDecimal balanceFrom = transferRepository.getMapStorage().get(cardFrom.getCardNumber()).getAmount().getValue();
+        var balanceFrom = transferRepository.findByCardNumberAndAmountValue(cardFrom.getCardNumber()).get();
         Amount commission = new Amount(amount.getValue().divide(BigDecimal.valueOf(COMMISSION)), amount.getCurrency());
         BigDecimal sumResult = commission.getValue().add(amount.getValue());
 
@@ -75,7 +75,8 @@ public class TransferService {
     private String operationWithMoney(Verification verification, Operation operation) throws InvalidTransactionExceptions {
         if (verification.getCode().equals(operation.getSecretCode())) {
             System.out.println("СЕКРЕТНЫЙ КОД СОВПАДАЕТ");
-            BigDecimal balanceFrom = transferRepository.getMapStorage().get(operation.getCardFromNumber()).getAmount().getValue();
+//            BigDecimal balanceFrom = transferRepository.getMapStorage().get(operation.getCardFromNumber()).getAmount().getValue();
+            BigDecimal balanceFrom = transferRepository.findByCardNumberAndAmountValue(operation.getCardFromNumber()).get();
             BigDecimal sumResult = operation.getCommission().getValue().add(operation.getAmount().getValue());
             LogBuilder logBuilder = new LogBuilder()
                     .setOperationId(verification.getOperationId())
@@ -85,21 +86,29 @@ public class TransferService {
                     .setCommission(operation.getCommission());
             if (balanceFrom.compareTo(sumResult) >= 0) {
                 //устанавливаем новый баланс на нашу исходную карту
-                transferRepository.getMapStorage().get(operation.getCardFromNumber())
-                        .getAmount()
-                        .setValue(
-                                balanceFrom.subtract(sumResult)
-                        );
-                BigDecimal balanceTo = transferRepository.getMapStorage().get(operation.getCardToNumber()).getAmount().getValue();
+//                transferRepository.getMapStorage().get(operation.getCardFromNumber())
+//                        .getAmount()
+//                        .setValue(
+//                                balanceFrom.subtract(sumResult)
+//                        );
+                transferRepository.setBalanceCard(operation.getCardFromNumber(), sumResult);
+//                BigDecimal balanceTo = transferRepository.getMapStorage().get(operation.getCardToNumber()).getAmount().getValue();
+                BigDecimal balanceTo = transferRepository.findByCardNumberAndAmountValue(operation.getCardToNumber()).get();
 
                 //устанавливаем новый баланс на карту перевода
-                transferRepository.getMapStorage().get(operation.getCardToNumber())
-                        .getAmount()
-                        .setValue(balanceTo.add(operation.getAmount().getValue()
-                        ));
+//                transferRepository.getMapStorage().get(operation.getCardToNumber())
+//                        .getAmount()
+//                        .setValue(balanceTo.add(operation.getAmount().getValue()
+//                        ));
+                transferRepository.setBalanceCard(operation.getCardToNumber(), operation.getAmount().getValue());
+//                logBuilder.setResult(String.format("ТРАНЗАКЦИЯ ПРОШЛА УСПЕШНО! ВАШ БАЛАНС СОСТАВЛЯЕТ: %.2f %s",
+//                        transferRepository.getMapStorage().get(operation.getCardFromNumber()).getAmount().getValue().divide(new BigDecimal(100)),
+//                        operation.getAmount().getCurrency()));
                 logBuilder.setResult(String.format("ТРАНЗАКЦИЯ ПРОШЛА УСПЕШНО! ВАШ БАЛАНС СОСТАВЛЯЕТ: %.2f %s",
-                        transferRepository.getMapStorage().get(operation.getCardFromNumber()).getAmount().getValue().divide(new BigDecimal(100)),
+                        transferRepository.findByCardNumberAndAmountValue(operation.getCardFromNumber()).get().divide(new BigDecimal(100)),
                         operation.getAmount().getCurrency()));
+
+
                 transferLog.log(logBuilder);
                 //todo удалить заглушку и сделать для всех операций удаление, когда будем получать с front id операции
                 if (verification.getOperationId() != null) {
