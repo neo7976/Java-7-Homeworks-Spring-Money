@@ -1,15 +1,34 @@
 package sobinda.moneybysobin.model;
 
+import jdk.jfr.Enabled;
+import jdk.jfr.Name;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Data;
+import lombok.NoArgsConstructor;
+
+import javax.persistence.*;
 import java.util.Objects;
 
+@Entity
+@AllArgsConstructor
+@NoArgsConstructor
+@Builder
+@Table(name = "cards")
+@Data
 public class Card {
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Integer id;
 
+    @Column(name = "Number", length = 16, unique = true)
     private String cardNumber;
-
+    @Column(name = "ValidTill", length = 5)
     private String cardValidTill;
-
+    @Column(name = "CVV", length = 3)
     private String cardCVV;
     //Можно подумать над созданием списка разных валют на 1 карте
+    @Embedded
     private Amount amount;
 
     public Card(String cardNumber, String cardValidTill, String cardCVV, Amount amount) {
@@ -24,41 +43,37 @@ public class Card {
         this.cardValidTill = cardValidTill;
         this.cardCVV = cardCVV;
     }
-
-    public Card() {
-    }
-
-    public String getCardNumber() {
-        return cardNumber;
-    }
-
-    public void setCardNumber(String cardNumber) {
-        this.cardNumber = cardNumber;
-    }
-
-    public String getCardValidTill() {
-        return cardValidTill;
-    }
-
-    public void setCardValidTill(String cardValidTill) {
-        this.cardValidTill = cardValidTill;
-    }
-
-    public String getCardCVV() {
-        return cardCVV;
-    }
-
-    public void setCardCVV(String cardCVV) {
-        this.cardCVV = cardCVV;
-    }
-
-    public Amount getAmount() {
-        return amount;
-    }
-
-    public void setAmount(Amount amount) {
-        this.amount = amount;
-    }
+//    public String getCardNumber() {
+//        return cardNumber;
+//    }
+//
+//    public void setCardNumber(String cardNumber) {
+//        this.cardNumber = cardNumber;
+//    }
+//
+//    public String getCardValidTill() {
+//        return cardValidTill;
+//    }
+//
+//    public void setCardValidTill(String cardValidTill) {
+//        this.cardValidTill = cardValidTill;
+//    }
+//
+//    public String getCardCVV() {
+//        return cardCVV;
+//    }
+//
+//    public void setCardCVV(String cardCVV) {
+//        this.cardCVV = cardCVV;
+//    }
+//
+//    public Amount getAmount() {
+//        return amount;
+//    }
+//
+//    public void setAmount(Amount amount) {
+//        this.amount = amount;
+//    }
 
     @Override
     public String toString() {
