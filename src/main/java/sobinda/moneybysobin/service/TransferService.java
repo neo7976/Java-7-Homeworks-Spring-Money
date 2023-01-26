@@ -27,7 +27,7 @@ public class TransferService {
         this.transferLog = TransferLog.getInstance();
     }
 
-    @Transactional
+
     public String transferMoneyCardToCard(CardTransfer cardTransfer) throws InvalidTransactionExceptions {
         Card cardFrom = new Card(
                 cardTransfer.getCardFromNumber(),
@@ -67,7 +67,7 @@ public class TransferService {
         }
     }
 
-    @Transactional
+
     public String confirmOperation(Verification verification) throws InvalidTransactionExceptions {
         List<Operation> operations = transferRepository.confirmOperation(verification);
         for (Operation operation : operations) {

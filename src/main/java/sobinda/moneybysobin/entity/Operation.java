@@ -33,6 +33,7 @@ public class Operation {
     //Сделать генерацию кода, когда будет возможность отправить код и принять его через форму в front
     @Column(nullable = false)
     private String secretCode;
+    @Column(name = "confirm")
     private boolean isConfirm;
 
     public Operation(LogBuilder logBuilder) {
@@ -42,7 +43,6 @@ public class Operation {
         this.commission = logBuilder.getCommission();
         //todo сейчас front создает только 0000, потом сделать генерацию
         this.secretCode = "0000";
-        this.isConfirm = false;
     }
 
     @Override

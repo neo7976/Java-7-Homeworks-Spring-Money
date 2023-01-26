@@ -22,7 +22,7 @@ public interface CardRepository extends JpaRepository<Card, Integer> {
     Optional<BigDecimal> findByCardNumberBalance();
 
     @Query(value = "update money_transfer.cards c set c.value=:value where c.number=:number", nativeQuery = true)
-    Optional<BigDecimal> setBalanceCard(@Param("number") String number,
+    void setBalanceCard(@Param("number") String number,
                                         @Param("value") BigDecimal bigDecimal);
 
 }

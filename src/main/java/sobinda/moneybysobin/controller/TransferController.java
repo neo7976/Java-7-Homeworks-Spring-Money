@@ -9,7 +9,7 @@ import sobinda.moneybysobin.service.TransferService;
 
 @RestController
 public class TransferController {
-    TransferService transferService;
+    private final TransferService transferService;
 
     public TransferController(TransferService transferService) {
         this.transferService = transferService;
