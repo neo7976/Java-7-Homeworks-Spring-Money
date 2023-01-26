@@ -2,47 +2,44 @@ package sobinda.moneybysobin.repository;
 
 import org.springframework.stereotype.Repository;
 import sobinda.moneybysobin.exceptions.InvalidTransactionExceptions;
-import sobinda.moneybysobin.log.LogBuilder;
-import sobinda.moneybysobin.log.TransferLog;
 import sobinda.moneybysobin.model.Amount;
 import sobinda.moneybysobin.model.Card;
 import sobinda.moneybysobin.model.Operation;
 import sobinda.moneybysobin.model.Verification;
 
-import java.math.BigDecimal;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicInteger;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 @Repository
 public class TransferRepository {
     private final AtomicInteger id = new AtomicInteger(0);
-    private Map<String, Card> mapStorage;
+    private final CardRepository cardRepository;
+    //    private Map<String, Card> mapStorage;
     private ConcurrentHashMap<String, Operation> cardTransactionsWaitConfirmOperation;
 
 
-    Map<String, Card> map = Stream.of(
-                    new AbstractMap.SimpleEntry<>(
-                            "4558445885584747",
-                            new Card(
-                                    "4558445885584747",
-                                    "08/23",
-                                    "351",
-                                    new Amount(new BigDecimal(50_000_00), "RUR"))),
-                    new AbstractMap.SimpleEntry<>(
-                            "4558445885585555",
-                            new Card(
-                                    "4558445885585555",
-                                    "08/23",
-                                    "352",
-                                    new Amount(new BigDecimal(25_000_00), "RUR")))
-            )
-            .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
+//    Map<String, Card> map = Stream.of(
+//                    new AbstractMap.SimpleEntry<>(
+//                            "4558445885584747",
+//                            new Card(
+//                                    "4558445885584747",
+//                                    "08/23",
+//                                    "351",
+//                                    new Amount(new BigDecimal(50_000_00), "RUR"))),
+//                    new AbstractMap.SimpleEntry<>(
+//                            "4558445885585555",
+//                            new Card(
+//                                    "4558445885585555",
+//                                    "08/23",
+//                                    "352",
+//                                    new Amount(new BigDecimal(25_000_00), "RUR")))
+//            )
+//            .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
 
-    public TransferRepository() {
-        this.mapStorage = new ConcurrentHashMap<>(map);
+    public TransferRepository(CardRepository cardRepository) {
+        this.cardRepository = cardRepository;
+//        this.mapStorage = new ConcurrentHashMap<>(map);
         cardTransactionsWaitConfirmOperation = new ConcurrentHashMap<>();
     }
 
@@ -55,16 +52,28 @@ public class TransferRepository {
     }
 
     public void validCardToBase(Card cardFrom, String cardNumberTo) throws InvalidTransactionExceptions {
-        if (!mapStorage.containsKey(cardFrom.getCardNumber()) || !mapStorage.containsKey(cardNumberTo)) {
+//        if (!mapStorage.containsKey(cardFrom.getCardNumber()) || !mapStorage.containsKey(cardNumberTo)) {
+//            throw new InvalidTransactionExceptions("Одной из карт нет в базе данных");
+//        }
+//        if (!mapStorage.get(cardFrom.getCardNumber()).equals(cardFrom)) {
+//            throw new InvalidTransactionExceptions("Ошибка в доступе к карте списания");
+//        }
+//    }
+        if (cardRepository.findByCardNumber(cardNumberTo).isEmpty() || cardRepository.findByCardNumber(cardFrom.getCardNumber()).isEmpty()) {
             throw new InvalidTransactionExceptions("Одной из карт нет в базе данных");
         }
-        if (!mapStorage.get(cardFrom.getCardNumber()).equals(cardFrom)) {
+        if (!cardRepository.findByCardNumber(cardFrom.getCardNumber()).equals(cardFrom)) {
             throw new InvalidTransactionExceptions("Ошибка в доступе к карте списания");
         }
     }
 
     public void validCurrencyCardTo(String cardNumberTo, Amount amount) throws InvalidTransactionExceptions {
-        if (!mapStorage.get(cardNumberTo).getAmount().getCurrency().equals(amount.getCurrency())) {
+//        if (!mapStorage.get(cardNumberTo).getAmount().getCurrency().equals(amount.getCurrency())) {
+//            throw new InvalidTransactionExceptions(String.format("Карта %s не имеет валютный счёт [%s] для перевода\n",
+//                    cardNumberTo,
+//                    amount.getCurrency()));
+//        }
+        if (cardRepository.findByCardNumberAndCurrency(cardNumberTo, amount.getCurrency()).isEmpty()) {
             throw new InvalidTransactionExceptions(String.format("Карта %s не имеет валютный счёт [%s] для перевода\n",
                     cardNumberTo,
                     amount.getCurrency()));
@@ -84,13 +93,13 @@ public class TransferRepository {
         throw new InvalidTransactionExceptions("Ошибочка, такого мы не предвидели!");
     }
 
-    public Map<String, Card> getMapStorage() {
-        return mapStorage;
-    }
+//    public Map<String, Card> getMapStorage() {
+//        return mapStorage;
+//    }
 
-    public void setMapStorage(String cardNumber, Card card) {
-        mapStorage.put(cardNumber, card);
-    }
+//    public void setMapStorage(String cardNumber, Card card) {
+//        mapStorage.put(cardNumber, card);
+//    }
 
     public void setCardTransactionsWaitConfirmOperation(String id, Operation operation) {
         cardTransactionsWaitConfirmOperation.put(id, operation);

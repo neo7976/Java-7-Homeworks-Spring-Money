@@ -21,6 +21,7 @@ import java.util.stream.Stream;
 
 class TransferRepositoryTest {
     TransferRepository transferRepository;
+    private final CardRepository cardRepository;
     public static Card card1 = new Card(
             "4558445885584747",
             "08/23",
@@ -31,10 +32,14 @@ class TransferRepositoryTest {
             "08/23",
             "352");
 
+    TransferRepositoryTest(CardRepository cardRepository) {
+        this.cardRepository = cardRepository;
+    }
+
 
     @BeforeEach
     void setUp() {
-        transferRepository = new TransferRepository();
+        transferRepository = new TransferRepository(cardRepository);
     }
 
     @AfterEach
