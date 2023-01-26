@@ -11,7 +11,8 @@ import java.util.Optional;
 
 public interface OperationRepository extends JpaRepository<Operation, Integer> {
 
-//    List<Operation> findAllByConfirmIsFalse();
+    @Query(value = "select o from Operation o where o.isConfirm=false")
+    List<Operation> findAllByConfirm();
 
     Optional<Operation> findByIdAndSecretCode(Integer id, String secretCode);
 

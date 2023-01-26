@@ -1,5 +1,6 @@
 package sobinda.moneybysobin.repository;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Repository;
 import sobinda.moneybysobin.exceptions.InvalidTransactionExceptions;
 import sobinda.moneybysobin.entity.Amount;
@@ -16,13 +17,15 @@ import java.util.concurrent.atomic.AtomicInteger;
 public class TransferRepository {
     //todo потом взять из БД и добавить как операцию
     private final AtomicInteger id = new AtomicInteger(0);
-    private final CardRepository cardRepository;
-    private final OperationRepository operationRepository;
+    @Autowired
+    private CardRepository cardRepository;
+    @Autowired
+    private OperationRepository operationRepository;
 
-    public TransferRepository(CardRepository cardRepository, OperationRepository operationRepository) {
-        this.cardRepository = cardRepository;
-        this.operationRepository = operationRepository;
-    }
+//    public TransferRepository(CardRepository cardRepository, OperationRepository operationRepository) {
+//        this.cardRepository = cardRepository;
+//        this.operationRepository = operationRepository;
+//    }
 
     public String transferMoneyCardToCard(Card cardFrom, String cardNumberTo, Amount amount) throws InvalidTransactionExceptions {
         //проверяем на наличие карт в базе, валюты на карте
@@ -58,15 +61,14 @@ public class TransferRepository {
                 , verification.getCode());
         if (verification.getOperationId() == null) {
             System.out.println("Сработала заглушка");
-//            return operationRepository.findAllByConfirmIsFalse();
-            return Collections.emptyList();
+            //todo заглушка, чтобы завершить все операции из-за бага на фронте
+            return operationRepository.findAllByConfirm();
         } else if (resultOperation.isPresent()) {
             System.out.println("Найдена операция на очередь об оплате");
             return Collections.singletonList(resultOperation.get());
         }
         //выбросить ошибку в сервисе или репозитории и удалить временные данные
         throw new InvalidTransactionExceptions("Ошибочка, такого мы не предвидели!");
-//        return Collections.emptyList();
     }
 
     public Optional<BigDecimal> findByCardNumberAndAmountValue(String cardNumber) {
