@@ -16,7 +16,7 @@ import java.util.List;
 
 @Service
 public class TransferService {
-    TransferRepository transferRepository;
+    private final TransferRepository transferRepository;
     //1%
     private final int COMMISSION = 100;
     private final String SECRET_CODE = "0000";
@@ -57,10 +57,8 @@ public class TransferService {
                 .setCommission(commission);
         if (balanceFrom.compareTo(sumResult) >= 0) {
             logBuilder.setResult("ЗАПРОС НА ПЕРЕВОД");
-//            transferRepository.setCardTransactionsWaitConfirmOperation(operationId, new Operation(logBuilder));
-            //todo дописать
-//            transferRepository.[[]]
-//            transferLog.log(logBuilder);
+            transferRepository.saveOperationRepository(logBuilder);
+            transferLog.log(logBuilder);
             return "Ожидаем подтверждение на перевод операции №" + operationId;
         } else {
             logBuilder.setResult("НЕДОСТАТОЧНО СРЕДСТВ ДЛЯ ОПЕРАЦИИ");
@@ -71,19 +69,16 @@ public class TransferService {
 
     @Transactional
     public String confirmOperation(Verification verification) throws InvalidTransactionExceptions {
-//        List<Operation> operations = transferRepository.confirmOperation(verification);
-//        for (Operation operation : operations) {
-//            return operationWithMoney(verification, operation);
-//        }
-//        throw new InvalidTransactionExceptions("Ошибочка, такого мы не предвидели!");
-        //todo заглушка
-        return null;
+        List<Operation> operations = transferRepository.confirmOperation(verification);
+        for (Operation operation : operations) {
+            return operationWithMoney(verification, operation);
+        }
+        throw new InvalidTransactionExceptions("Ошибочка, такого мы не предвидели!");
     }
 
     private String operationWithMoney(Verification verification, Operation operation) throws InvalidTransactionExceptions {
         if (verification.getCode().equals(operation.getSecretCode())) {
             System.out.println("СЕКРЕТНЫЙ КОД СОВПАДАЕТ");
-//            BigDecimal balanceFrom = transferRepository.getMapStorage().get(operation.getCardFromNumber()).getAmount().getValue();
             BigDecimal balanceFrom = transferRepository.findByCardNumberAndAmountValue(operation.getCardFromNumber()).get();
             BigDecimal sumResult = operation.getCommission().getValue().add(operation.getAmount().getValue());
             LogBuilder logBuilder = new LogBuilder()
@@ -94,24 +89,12 @@ public class TransferService {
                     .setCommission(operation.getCommission());
             if (balanceFrom.compareTo(sumResult) >= 0) {
                 //устанавливаем новый баланс на нашу исходную карту
-//                transferRepository.getMapStorage().get(operation.getCardFromNumber())
-//                        .getAmount()
-//                        .setValue(
-//                                balanceFrom.subtract(sumResult)
-//                        );
                 transferRepository.setBalanceCard(operation.getCardFromNumber(), sumResult);
 //                BigDecimal balanceTo = transferRepository.getMapStorage().get(operation.getCardToNumber()).getAmount().getValue();
                 BigDecimal balanceTo = transferRepository.findByCardNumberAndAmountValue(operation.getCardToNumber()).get();
 
                 //устанавливаем новый баланс на карту перевода
-//                transferRepository.getMapStorage().get(operation.getCardToNumber())
-//                        .getAmount()
-//                        .setValue(balanceTo.add(operation.getAmount().getValue()
-//                        ));
                 transferRepository.setBalanceCard(operation.getCardToNumber(), operation.getAmount().getValue());
-//                logBuilder.setResult(String.format("ТРАНЗАКЦИЯ ПРОШЛА УСПЕШНО! ВАШ БАЛАНС СОСТАВЛЯЕТ: %.2f %s",
-//                        transferRepository.getMapStorage().get(operation.getCardFromNumber()).getAmount().getValue().divide(new BigDecimal(100)),
-//                        operation.getAmount().getCurrency()));
                 logBuilder.setResult(String.format("ТРАНЗАКЦИЯ ПРОШЛА УСПЕШНО! ВАШ БАЛАНС СОСТАВЛЯЕТ: %.2f %s",
                         transferRepository.findByCardNumberAndAmountValue(operation.getCardFromNumber()).get().divide(new BigDecimal(100)),
                         operation.getAmount().getCurrency()));

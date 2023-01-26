@@ -5,6 +5,7 @@ import sobinda.moneybysobin.exceptions.InvalidTransactionExceptions;
 import sobinda.moneybysobin.entity.Amount;
 import sobinda.moneybysobin.entity.Card;
 import sobinda.moneybysobin.entity.Operation;
+import sobinda.moneybysobin.log.LogBuilder;
 import sobinda.moneybysobin.model.Verification;
 
 import java.math.BigDecimal;
@@ -51,26 +52,22 @@ public class TransferRepository {
         }
     }
 
-//    public List<Operation> confirmOperation(Verification verification) throws InvalidTransactionExceptions {
+    public List<Operation> confirmOperation(Verification verification) throws InvalidTransactionExceptions {
 //        //todo убрать null и переделать из списка просто в операцию, когда сможем получать id c front
+//        var resultOperation = operationRepository.findByIdAndSecretCode(
+//                Integer.valueOf(verification.getOperationId())
+//                , verification.getCode());
 //        if (verification.getOperationId() == null) {
 //            System.out.println("Сработала заглушка");
-//            return new ArrayList<>(cardTransactionsWaitConfirmOperation.values());
-//        } else if (cardTransactionsWaitConfirmOperation.containsKey(verification.getOperationId())) {
+//            return operationRepository.findAllByConfirmIsFalse();
+//        } else if (resultOperation.isPresent()) {
 //            System.out.println("Найдена операция на очередь об оплате");
-//            return Collections.singletonList(cardTransactionsWaitConfirmOperation.get(verification.getOperationId()));
+//            return Collections.singletonList(resultOperation.get());
 //        }
 //        //выбросить ошибку в сервисе или репозитории и удалить временные данные
 //        throw new InvalidTransactionExceptions("Ошибочка, такого мы не предвидели!");
-//    }
-
-//    public void setCardTransactionsWaitConfirmOperation(String id, Operation operation) {
-//        cardTransactionsWaitConfirmOperation.put(id, operation);
-//    }
-//
-//    public void deleteWaitOperation(String operationId) {
-//        cardTransactionsWaitConfirmOperation.remove(operationId);
-//    }
+        return Collections.emptyList();
+    }
 
     public Optional<BigDecimal> findByCardNumberAndAmountValue(String cardNumber) {
         return cardRepository.findByCardNumberAndAmountValue(cardNumber);
@@ -78,5 +75,16 @@ public class TransferRepository {
 
     public void setBalanceCard(String cardNumber, BigDecimal bigDecimal) {
         cardRepository.setBalanceCard(cardNumber, bigDecimal);
+    }
+
+    public void saveOperationRepository(LogBuilder logBuilder) {
+        Operation operation = Operation.builder()
+                .cardFromNumber(logBuilder.getCardNumberFrom())
+                .cardToNumber(logBuilder.getCardNumberTo())
+                .commission(logBuilder.getCommission())
+                .amount(logBuilder.getAmount())
+                .secretCode("0000")
+                .build();
+        operationRepository.save(operation);
     }
 }

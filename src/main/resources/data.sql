@@ -9,4 +9,3 @@ values ('RUR', 1000000,'125', '4558665885585555', '06/26');
 insert into money_transfer.cards(currency, value, cvv, number, valid_till)
 values ('RUR', 1500000,'385', '4888445885585555', '05/25');
 
-update money_transfer.cards
