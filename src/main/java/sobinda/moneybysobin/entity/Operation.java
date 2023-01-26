@@ -25,9 +25,14 @@ public class Operation {
     @Embedded
     private Amount amount;
     @Embedded
+    @AttributeOverrides({
+            @AttributeOverride(name = "value", column = @Column(name = "commission_value")),
+            @AttributeOverride(name = "currency", column = @Column(name = "commission_currency"))
+    })
     private Amount commission;
     //Сделать генерацию кода, когда будет возможность отправить код и принять его через форму в front
     private String secretCode;
+    private boolean isConfirm;
 
     public Operation(LogBuilder logBuilder) {
         this.cardFromNumber = logBuilder.getCardNumberFrom();

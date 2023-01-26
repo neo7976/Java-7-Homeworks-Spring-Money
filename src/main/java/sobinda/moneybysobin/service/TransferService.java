@@ -57,8 +57,10 @@ public class TransferService {
                 .setCommission(commission);
         if (balanceFrom.compareTo(sumResult) >= 0) {
             logBuilder.setResult("ЗАПРОС НА ПЕРЕВОД");
-            transferRepository.setCardTransactionsWaitConfirmOperation(operationId, new Operation(logBuilder));
-            transferLog.log(logBuilder);
+//            transferRepository.setCardTransactionsWaitConfirmOperation(operationId, new Operation(logBuilder));
+            //todo дописать
+//            transferRepository.[[]]
+//            transferLog.log(logBuilder);
             return "Ожидаем подтверждение на перевод операции №" + operationId;
         } else {
             logBuilder.setResult("НЕДОСТАТОЧНО СРЕДСТВ ДЛЯ ОПЕРАЦИИ");
@@ -69,11 +71,13 @@ public class TransferService {
 
     @Transactional
     public String confirmOperation(Verification verification) throws InvalidTransactionExceptions {
-        List<Operation> operations = transferRepository.confirmOperation(verification);
-        for (Operation operation : operations) {
-            return operationWithMoney(verification, operation);
-        }
-        throw new InvalidTransactionExceptions("Ошибочка, такого мы не предвидели!");
+//        List<Operation> operations = transferRepository.confirmOperation(verification);
+//        for (Operation operation : operations) {
+//            return operationWithMoney(verification, operation);
+//        }
+//        throw new InvalidTransactionExceptions("Ошибочка, такого мы не предвидели!");
+        //todo заглушка
+        return null;
     }
 
     private String operationWithMoney(Verification verification, Operation operation) throws InvalidTransactionExceptions {
@@ -115,9 +119,9 @@ public class TransferService {
 
                 transferLog.log(logBuilder);
                 //todo удалить заглушку и сделать для всех операций удаление, когда будем получать с front id операции
-                if (verification.getOperationId() != null) {
-                    transferRepository.deleteWaitOperation(verification.getOperationId());
-                }
+//                if (verification.getOperationId() != null) {
+//                    transferRepository.deleteWaitOperation(verification.getOperationId());
+//                }
                 return "Успешная транзакция №" + verification.getOperationId();
             } else {
                 logBuilder.setResult("НЕДОСТАТОЧНО СРЕДСТВ ДЛЯ ОПЕРАЦИИ");
