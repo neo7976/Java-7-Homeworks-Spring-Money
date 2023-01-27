@@ -33,7 +33,8 @@ public class TransferRepository {
         validCardToBase(cardFrom, cardNumberTo);
         validCurrencyCardTo(cardNumberTo, amount);
 
-        return String.valueOf(id.incrementAndGet());
+//        return String.valueOf(id.incrementAndGet());
+        return "Карты имеются в базе данных";
     }
 
     public void validCardToBase(Card cardFrom, String cardNumberTo) throws InvalidTransactionExceptions {
@@ -77,7 +78,7 @@ public class TransferRepository {
     }
 
     public void setBalanceCard(String cardNumber, BigDecimal bigDecimal) {
-        cardRepository.setBalanceCard(cardNumber, bigDecimal);
+        cardRepository.setBalanceCard(bigDecimal, cardNumber);
     }
 
     public String saveOperationRepository(LogBuilder logBuilder) {

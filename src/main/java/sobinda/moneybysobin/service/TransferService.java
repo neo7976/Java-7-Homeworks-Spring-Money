@@ -42,7 +42,7 @@ public class TransferService {
             throw new InvalidTransactionExceptions("Карта для перевода и получения совпадает!\n" +
                     "Проверьте входные данные ещё раз");
         }
-        transferRepository.transferMoneyCardToCard(cardFrom, cardToNumber, amount);
+        System.out.println(transferRepository.transferMoneyCardToCard(cardFrom, cardToNumber, amount));
 
         var balanceFrom = transferRepository.findByCardNumberAndAmountValue(cardFrom.getCardNumber()).get();
         Amount commission = new Amount(amount.getValue().divide(BigDecimal.valueOf(COMMISSION)), amount.getCurrency());
