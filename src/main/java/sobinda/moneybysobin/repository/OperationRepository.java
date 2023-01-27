@@ -8,6 +8,7 @@ import sobinda.moneybysobin.entity.Operation;
 import java.math.BigDecimal;
 import java.util.List;
 import java.util.Optional;
+import java.util.UUID;
 
 public interface OperationRepository extends JpaRepository<Operation, Integer> {
 
@@ -15,5 +16,4 @@ public interface OperationRepository extends JpaRepository<Operation, Integer> {
     List<Operation> findAllByConfirm();
 
     Optional<Operation> findByIdAndSecretCode(Integer id, String secretCode);
-
 }

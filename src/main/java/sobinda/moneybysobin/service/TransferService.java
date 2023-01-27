@@ -42,7 +42,7 @@ public class TransferService {
             throw new InvalidTransactionExceptions("Карта для перевода и получения совпадает!\n" +
                     "Проверьте входные данные ещё раз");
         }
-        String operationId = transferRepository.transferMoneyCardToCard(cardFrom, cardToNumber, amount);
+        transferRepository.transferMoneyCardToCard(cardFrom, cardToNumber, amount);
 
         var balanceFrom = transferRepository.findByCardNumberAndAmountValue(cardFrom.getCardNumber()).get();
         Amount commission = new Amount(amount.getValue().divide(BigDecimal.valueOf(COMMISSION)), amount.getCurrency());
@@ -50,19 +50,18 @@ public class TransferService {
 
         // пишем проверку баланса и перевод денег
         LogBuilder logBuilder = new LogBuilder()
-                .setOperationId(operationId)
                 .setCardNumberFrom(cardFrom.getCardNumber())
                 .setCardNumberTo(cardToNumber)
                 .setAmount(amount)
                 .setCommission(commission);
         if (balanceFrom.compareTo(sumResult) >= 0) {
-            logBuilder.setResult("ЗАПРОС НА ПЕРЕВОД");
-            transferRepository.saveOperationRepository(logBuilder);
+            String operationId = transferRepository.saveOperationRepository(logBuilder);
+            logBuilder.setResult("ЗАПРОС НА ПЕРЕВОД")
+                    .setOperationId(operationId);
             transferLog.log(logBuilder);
             return "Ожидаем подтверждение на перевод операции №" + operationId;
         } else {
             logBuilder.setResult("НЕДОСТАТОЧНО СРЕДСТВ ДЛЯ ОПЕРАЦИИ");
-            transferLog.log(logBuilder);
             throw new InvalidTransactionExceptions(logBuilder.getResult());
         }
     }

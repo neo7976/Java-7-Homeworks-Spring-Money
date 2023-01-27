@@ -4,10 +4,12 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import org.hibernate.annotations.GenericGenerator;
 import sobinda.moneybysobin.log.LogBuilder;
 
 import javax.persistence.*;
 import java.util.Objects;
+import java.util.UUID;
 
 @Data
 @Entity
@@ -16,8 +18,14 @@ import java.util.Objects;
 @Builder
 public class Operation {
     @Id
+//    @GeneratedValue(generator = "UUID")
+//    @GenericGenerator(
+//            name = "UUID",
+//            strategy = "org.hibernate.id.UUIDGenerator"
+//    )
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer id;
+
     @Column(name = "Number_From_Card", length = 16)
     private String cardFromNumber;
     @Column(name = "Number_To_Card", length = 16)
@@ -44,6 +52,7 @@ public class Operation {
         //todo сейчас front создает только 0000, потом сделать генерацию
         this.secretCode = "0000";
     }
+
 
     @Override
     public String toString() {

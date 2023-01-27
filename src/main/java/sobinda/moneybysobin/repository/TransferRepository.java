@@ -1,6 +1,7 @@
 package sobinda.moneybysobin.repository;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Example;
 import org.springframework.stereotype.Repository;
 import sobinda.moneybysobin.exceptions.InvalidTransactionExceptions;
 import sobinda.moneybysobin.entity.Amount;
@@ -79,7 +80,7 @@ public class TransferRepository {
         cardRepository.setBalanceCard(cardNumber, bigDecimal);
     }
 
-    public void saveOperationRepository(LogBuilder logBuilder) {
+    public String saveOperationRepository(LogBuilder logBuilder) {
         Operation operation = Operation.builder()
                 .cardFromNumber(logBuilder.getCardNumberFrom())
                 .cardToNumber(logBuilder.getCardNumberTo())
@@ -87,6 +88,6 @@ public class TransferRepository {
                 .amount(logBuilder.getAmount())
                 .secretCode("0000")
                 .build();
-        operationRepository.save(operation);
+        return String.valueOf(operationRepository.save(operation).getId());
     }
 }

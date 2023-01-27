@@ -13,7 +13,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 public class TransferLog {
     private static final DateTimeFormatter dtf = DateTimeFormatter.ofPattern("yyyy/MM/dd HH:mm:ss");
     protected AtomicInteger num = new AtomicInteger(0);
-    private final ConcurrentHashMap<String, Integer> cardTransactions = new ConcurrentHashMap<>();
+//    private final ConcurrentHashMap<String, Integer> cardTransactions = new ConcurrentHashMap<>();
     private static volatile TransferLog INSTANCE = null;
 
     File file = new File("src/main/resources/log/logCardTransactions.log");
@@ -32,20 +32,20 @@ public class TransferLog {
     }
 
     public void log(LogBuilder logBuilder) {
-        String operationId = String.valueOf(num.incrementAndGet());
-        cardTransactions.put(logBuilder.getCardNumberFrom(), cardTransactions.getOrDefault(logBuilder.getCardNumberFrom(), 0) + 1);
+//        String operationId = String.valueOf(num.incrementAndGet());
+//        cardTransactions.put(logBuilder.getCardNumberFrom(), cardTransactions.getOrDefault(logBuilder.getCardNumberFrom(), 0) + 1);
         String s = String.format(
                 "[%s]\n" +
                         "Операция в системе: №%s\n" +
-                        "Операция по карте: №%d\n" +
+//                        "Операция по карте: №%d\n" +
                         "Номер карты списания: %s\n" +
                         "Номер карты зачисления: %s\n" +
                         "Сумма списания: %.2f %s\n" +
                         "Комиссия за перевод: %.2f %s\n" +
                         "Результат операции: %s\n\n",
                 dtf.format(LocalDateTime.now()),
-                operationId,
-                cardTransactions.get(logBuilder.getCardNumberFrom()),
+                logBuilder.getOperationId(),
+//                cardTransactions.get(logBuilder.getCardNumberFrom()),
                 logBuilder.getCardNumberFrom(),
                 logBuilder.getCardNumberTo(),
                 logBuilder.getAmount().getValue().divide(new BigDecimal(100)),
