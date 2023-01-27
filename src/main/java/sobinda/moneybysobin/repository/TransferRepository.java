@@ -91,4 +91,7 @@ public class TransferRepository {
                 .build();
         return String.valueOf(operationRepository.save(operation).getId());
     }
+    public void setOperationConfirm(int id) {
+        operationRepository.setConfirmTrue(id);
+    }
 }

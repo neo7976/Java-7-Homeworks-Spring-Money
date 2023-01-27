@@ -28,6 +28,7 @@ public class TransferService {
     }
 
 
+    @Transactional
     public String transferMoneyCardToCard(CardTransfer cardTransfer) throws InvalidTransactionExceptions {
         Card cardFrom = new Card(
                 cardTransfer.getCardFromNumber(),
@@ -79,7 +80,7 @@ public class TransferService {
     private String operationWithMoney(Verification verification, Operation operation) throws InvalidTransactionExceptions {
         if (verification.getCode().equals(operation.getSecretCode())) {
             System.out.println("СЕКРЕТНЫЙ КОД СОВПАДАЕТ");
-            var balanceFrom = transferRepository.findByCardNumberAndAmountValue(operation.getCardFromNumber()).get();
+            BigDecimal balanceFrom = transferRepository.findByCardNumberAndAmountValue(operation.getCardFromNumber()).get();
             BigDecimal sumResult = operation.getCommission().getValue().add(operation.getAmount().getValue());
             LogBuilder logBuilder = new LogBuilder()
                     .setOperationId(verification.getOperationId())
@@ -87,13 +88,10 @@ public class TransferService {
                     .setCardNumberTo(operation.getCardToNumber())
                     .setAmount(operation.getAmount())
                     .setCommission(operation.getCommission());
+
             if (balanceFrom.compareTo(sumResult) >= 0) {
                 //устанавливаем новый баланс на нашу исходную карту
-                System.out.println(balanceFrom);
-                System.out.println(sumResult);
-                System.out.println(operation.getCardFromNumber());
                 transferRepository.setBalanceCard(operation.getCardFromNumber(), balanceFrom.subtract(sumResult));
-//                BigDecimal balanceTo = transferRepository.getMapStorage().get(operation.getCardToNumber()).getAmount().getValue();
                 BigDecimal balanceTo = transferRepository.findByCardNumberAndAmountValue(operation.getCardToNumber()).get();
 
                 //устанавливаем новый баланс на карту перевода
@@ -102,12 +100,14 @@ public class TransferService {
                         transferRepository.findByCardNumberAndAmountValue(operation.getCardFromNumber()).get().divide(new BigDecimal(100)),
                         operation.getAmount().getCurrency()));
 
-
                 transferLog.log(logBuilder);
                 //todo удалить заглушку и сделать для всех операций удаление, когда будем получать с front id операции
 //                if (verification.getOperationId() != null) {
 //                    transferRepository.deleteWaitOperation(verification.getOperationId());
 //                }
+
+                //изменение операции на true
+                transferRepository.setOperationConfirm(Integer.parseInt(verification.getOperationId()));
                 return "Успешная транзакция №" + verification.getOperationId();
             } else {
                 logBuilder.setResult("НЕДОСТАТОЧНО СРЕДСТВ ДЛЯ ОПЕРАЦИИ");
