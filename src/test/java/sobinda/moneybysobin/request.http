@@ -78,6 +78,6 @@ Content-Type: application/json
 //Недостаточно средст на карте
 {
   "code": "0000",
-  "operationId": "1"
+  "operationId": "5"
 }
 

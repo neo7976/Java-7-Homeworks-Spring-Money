@@ -66,7 +66,7 @@ public class TransferService {
         }
     }
 
-
+    @Transactional
     public String confirmOperation(Verification verification) throws InvalidTransactionExceptions {
         List<Operation> operations = transferRepository.confirmOperation(verification);
         for (Operation operation : operations) {
@@ -75,10 +75,11 @@ public class TransferService {
         throw new InvalidTransactionExceptions("Ошибочка, такого мы не предвидели!");
     }
 
+
     private String operationWithMoney(Verification verification, Operation operation) throws InvalidTransactionExceptions {
         if (verification.getCode().equals(operation.getSecretCode())) {
             System.out.println("СЕКРЕТНЫЙ КОД СОВПАДАЕТ");
-            BigDecimal balanceFrom = transferRepository.findByCardNumberAndAmountValue(operation.getCardFromNumber()).get();
+            var balanceFrom = transferRepository.findByCardNumberAndAmountValue(operation.getCardFromNumber()).get();
             BigDecimal sumResult = operation.getCommission().getValue().add(operation.getAmount().getValue());
             LogBuilder logBuilder = new LogBuilder()
                     .setOperationId(verification.getOperationId())
@@ -88,12 +89,15 @@ public class TransferService {
                     .setCommission(operation.getCommission());
             if (balanceFrom.compareTo(sumResult) >= 0) {
                 //устанавливаем новый баланс на нашу исходную карту
-                transferRepository.setBalanceCard(operation.getCardFromNumber(), sumResult);
+                System.out.println(balanceFrom);
+                System.out.println(sumResult);
+                System.out.println(operation.getCardFromNumber());
+                transferRepository.setBalanceCard(operation.getCardFromNumber(), balanceFrom.subtract(sumResult));
 //                BigDecimal balanceTo = transferRepository.getMapStorage().get(operation.getCardToNumber()).getAmount().getValue();
                 BigDecimal balanceTo = transferRepository.findByCardNumberAndAmountValue(operation.getCardToNumber()).get();
 
                 //устанавливаем новый баланс на карту перевода
-                transferRepository.setBalanceCard(operation.getCardToNumber(), operation.getAmount().getValue());
+                transferRepository.setBalanceCard(operation.getCardToNumber(), balanceTo.add(operation.getAmount().getValue()));
                 logBuilder.setResult(String.format("ТРАНЗАКЦИЯ ПРОШЛА УСПЕШНО! ВАШ БАЛАНС СОСТАВЛЯЕТ: %.2f %s",
                         transferRepository.findByCardNumberAndAmountValue(operation.getCardFromNumber()).get().divide(new BigDecimal(100)),
                         operation.getAmount().getCurrency()));
