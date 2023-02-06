@@ -83,7 +83,7 @@ public class TransferService {
             BigDecimal balanceFrom = transferRepository.findByCardNumberAndAmountValue(operation.getCardFromNumber()).get();
             BigDecimal sumResult = operation.getCommission().getValue().add(operation.getAmount().getValue());
             LogBuilder logBuilder = new LogBuilder()
-                    .setOperationId(verification.getOperationId())
+                    .setOperationId(String.valueOf(operation.getId()))
                     .setCardNumberFrom(operation.getCardFromNumber())
                     .setCardNumberTo(operation.getCardToNumber())
                     .setAmount(operation.getAmount())
@@ -107,7 +107,7 @@ public class TransferService {
 //                }
 
                 //изменение операции на true
-                transferRepository.setOperationConfirm(Integer.parseInt(verification.getOperationId()));
+                transferRepository.setOperationConfirm(operation.getId());
                 return "Успешная транзакция №" + verification.getOperationId();
             } else {
                 logBuilder.setResult("НЕДОСТАТОЧНО СРЕДСТВ ДЛЯ ОПЕРАЦИИ");

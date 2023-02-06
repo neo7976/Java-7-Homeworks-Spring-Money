@@ -58,19 +58,22 @@ public class TransferRepository {
 
     public List<Operation> confirmOperation(Verification verification) throws InvalidTransactionExceptions {
         //todo убрать null и переделать из списка просто в операцию, когда сможем получать id c front
-        var resultOperation = operationRepository.findByIdAndSecretCode(
-                Integer.valueOf(verification.getOperationId())
-                , verification.getCode());
+
         if (verification.getOperationId() == null) {
             System.out.println("Сработала заглушка");
             //todo заглушка, чтобы завершить все операции из-за бага на фронте
             return operationRepository.findAllByConfirm();
-        } else if (resultOperation.isPresent()) {
-            System.out.println("Найдена операция на очередь об оплате");
-            return Collections.singletonList(resultOperation.get());
+        } else {
+            var resultOperation = operationRepository.findByIdAndSecretCode(
+                    Integer.valueOf(verification.getOperationId())
+                    , verification.getCode());
+            if (resultOperation.isPresent()) {
+                System.out.println("Найдена операция на очередь об оплате");
+                return Collections.singletonList(resultOperation.get());
+            }
+            //выбросить ошибку в сервисе или репозитории и удалить временные данные
+            throw new InvalidTransactionExceptions("Ошибочка, такого мы не предвидели!");
         }
-        //выбросить ошибку в сервисе или репозитории и удалить временные данные
-        throw new InvalidTransactionExceptions("Ошибочка, такого мы не предвидели!");
     }
 
     public Optional<BigDecimal> findByCardNumberAndAmountValue(String cardNumber) {
@@ -91,6 +94,7 @@ public class TransferRepository {
                 .build();
         return String.valueOf(operationRepository.save(operation).getId());
     }
+
     public void setOperationConfirm(int id) {
         operationRepository.setConfirmTrue(id);
     }
