@@ -14,6 +14,7 @@ import java.math.BigDecimal;
 @Data
 public class Amount {
     private BigDecimal value;
+    @Column(length = 10)
     private String currency;
 
     @Override
