@@ -44,19 +44,21 @@ class TransferRepositoryTest {
     @Autowired
     OperationRepository operationRepository;
     private CardTransfer cardTransfer;
+    private Card card1;
+    private Card card2;
 
     @BeforeEach
     void setUp() {
-        var card1 = Card.builder().cardNumber("1158445885584747")
+        card1 = Card.builder().cardNumber("1158445885584747")
                 .cardValidTill("08/23")
                 .cardCVV("351")
                 .amount(new Amount(BigDecimal.valueOf(1111111), "RUR")).build();
-        this.testEntityManager.persistAndFlush(card1);
-        this.testEntityManager.persistAndFlush(Card.builder()
-                .cardNumber("1158445885585555")
+        card2 = Card.builder().cardNumber("1158445885585555")
                 .cardValidTill("08/23")
                 .cardCVV("352")
-                .amount(new Amount(BigDecimal.valueOf(2222222), "RUR")).build());
+                .amount(new Amount(BigDecimal.valueOf(2222222), "RUR")).build();
+        this.testEntityManager.persistAndFlush(card1);
+        this.testEntityManager.persistAndFlush(card2);
 
         transferRepository = new TransferRepository(cardRepository, operationRepository);
         cardTransfer = new CardTransfer(
@@ -75,6 +77,16 @@ class TransferRepositoryTest {
         BigDecimal error = new BigDecimal("0.0005");
         var result = cardRepository.findByCardNumberAndAmountValue(cardTransfer.getCardFromNumber()).get();
         MatcherAssert.assertThat(actual, is((closeTo(result, error))));
+    }
+
+
+    @SneakyThrows
+    @Test
+    void findByCardNumberTest() {
+        var result1 = cardRepository.findByCardNumber(cardTransfer.getCardFromNumber()).get();
+        var result2 = cardRepository.findByCardNumber(cardTransfer.getCardToNumber()).get();
+        MatcherAssert.assertThat(card1, is(result1));
+        MatcherAssert.assertThat(card2, is(result2));
     }
 
 //
