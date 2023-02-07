@@ -16,24 +16,15 @@ import java.util.concurrent.atomic.AtomicInteger;
 
 @Repository
 public class TransferRepository {
-    //todo потом взять из БД и добавить как операцию
-    private final AtomicInteger id = new AtomicInteger(0);
     @Autowired
     private CardRepository cardRepository;
     @Autowired
     private OperationRepository operationRepository;
 
-//    public TransferRepository(CardRepository cardRepository, OperationRepository operationRepository) {
-//        this.cardRepository = cardRepository;
-//        this.operationRepository = operationRepository;
-//    }
-
     public String transferMoneyCardToCard(Card cardFrom, String cardNumberTo, Amount amount) throws InvalidTransactionExceptions {
         //проверяем на наличие карт в базе, валюты на карте
         validCardToBase(cardFrom, cardNumberTo);
         validCurrencyCardTo(cardNumberTo, amount);
-
-//        return String.valueOf(id.incrementAndGet());
         return "Карты имеются в базе данных";
     }
 
