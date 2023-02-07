@@ -8,25 +8,34 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
+import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.boot.test.autoconfigure.orm.jpa.TestEntityManager;
+import org.springframework.test.context.junit4.SpringRunner;
+import org.testcontainers.shaded.org.hamcrest.MatcherAssert;
+import org.testcontainers.shaded.org.hamcrest.Matchers;
 import sobinda.moneybysobin.exceptions.InvalidTransactionExceptions;
 import sobinda.moneybysobin.log.LogBuilder;
 import sobinda.moneybysobin.entity.Amount;
 import sobinda.moneybysobin.entity.Card;
 import sobinda.moneybysobin.entity.Operation;
+import sobinda.moneybysobin.model.CardTransfer;
 import sobinda.moneybysobin.model.Verification;
 
 import java.math.BigDecimal;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Stream;
 
 
+@RunWith(SpringRunner.class)
+@AutoConfigureTestDatabase(replace = AutoConfigureTestDatabase.Replace.NONE)
 @DataJpaTest
 class TransferRepositoryTest {
 
-    private TransferRepository transferRepository;
+    TransferRepository transferRepository;
     TestEntityManager testEntityManager;
 
     @Autowired
@@ -35,27 +44,42 @@ class TransferRepositoryTest {
     @Autowired
     OperationRepository operationRepository;
 
+    @BeforeEach
+    void setUp() {
+        var card1 = Card.builder().cardNumber("4558445885584747")
+                .cardValidTill("08/23")
+                .cardCVV("351")
+                .amount(new Amount(BigDecimal.valueOf(1111111), "RUR")).build();
+        //todo java.lang.NullPointerException
+        this.testEntityManager.persistAndFlush(card1);
+        this.testEntityManager.persistAndFlush(Card.builder()
+                .cardNumber("4558445885585555")
+                .cardValidTill("08/23")
+                .cardCVV("352")
+                .amount(new Amount(BigDecimal.valueOf(2222222), "RUR")).build());
 
-//    public static Card card1 = new Card(
-//            "4558445885584747",
-//            "08/23",
-//            "351");
-//
-//    public static Card card2 = new Card(
-//            "4558445885585555",
-//            "08/23",
-//            "352");
-//
-//    @BeforeEach
-//    void setUp() {
-////        transferRepository = new TransferRepository(cardRepository, operationRepository);
-//        transferRepository = new TransferRepository();
-//    }
-//
-//    @AfterEach
-//    void tearDown() {
-//        transferRepository = null;
-//    }
+        transferRepository = new TransferRepository(cardRepository, operationRepository);
+    }
+
+    @SneakyThrows
+    @Test
+    void transferMoneyCardToCardTest() {
+        CardTransfer cardTransfer = new CardTransfer(
+                "4558445885584747",
+                "08/23",
+                "351",
+                "4558445885585555",
+                new Amount(BigDecimal.valueOf(50000), "RUR")
+        );
+        var actual = BigDecimal.valueOf(1111111);
+        BigDecimal error = new BigDecimal("0.0005");
+        var result = cardRepository.findByCardNumberAndAmountValue(cardTransfer.getCardToNumber()).get();
+//        MatcherAssert.assertThat(result).extracting(Card::getAmount).extracting(Amount::getValue).compareTo(BigDecimal.valueOf(1111111));
+        MatcherAssert.assertThat(actual, Matchers.is(Matchers.not(Matchers.closeTo(result, error))));
+
+
+    }
+
 //
 //    public static Stream<Arguments> sourceTransfer() {
 //        return Stream.of(

@@ -16,10 +16,15 @@ import java.util.concurrent.atomic.AtomicInteger;
 
 @Repository
 public class TransferRepository {
-    @Autowired
-    private CardRepository cardRepository;
-    @Autowired
-    private OperationRepository operationRepository;
+
+    private final CardRepository cardRepository;
+
+    private final OperationRepository operationRepository;
+
+    public TransferRepository(CardRepository cardRepository, OperationRepository operationRepository) {
+        this.cardRepository = cardRepository;
+        this.operationRepository = operationRepository;
+    }
 
     public String transferMoneyCardToCard(Card cardFrom, String cardNumberTo, Amount amount) throws InvalidTransactionExceptions {
         //проверяем на наличие карт в базе, валюты на карте
