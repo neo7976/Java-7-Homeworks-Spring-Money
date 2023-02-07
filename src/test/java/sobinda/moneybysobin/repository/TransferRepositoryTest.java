@@ -29,55 +29,52 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Stream;
 
+import static org.testcontainers.shaded.org.hamcrest.Matchers.*;
 
-@RunWith(SpringRunner.class)
+
 @AutoConfigureTestDatabase(replace = AutoConfigureTestDatabase.Replace.NONE)
 @DataJpaTest
 class TransferRepositoryTest {
 
     TransferRepository transferRepository;
+    @Autowired
     TestEntityManager testEntityManager;
-
     @Autowired
     CardRepository cardRepository;
-
     @Autowired
     OperationRepository operationRepository;
+    private CardTransfer cardTransfer;
 
     @BeforeEach
     void setUp() {
-        var card1 = Card.builder().cardNumber("4558445885584747")
+        var card1 = Card.builder().cardNumber("1158445885584747")
                 .cardValidTill("08/23")
                 .cardCVV("351")
                 .amount(new Amount(BigDecimal.valueOf(1111111), "RUR")).build();
-        //todo java.lang.NullPointerException
         this.testEntityManager.persistAndFlush(card1);
         this.testEntityManager.persistAndFlush(Card.builder()
-                .cardNumber("4558445885585555")
+                .cardNumber("1158445885585555")
                 .cardValidTill("08/23")
                 .cardCVV("352")
                 .amount(new Amount(BigDecimal.valueOf(2222222), "RUR")).build());
 
         transferRepository = new TransferRepository(cardRepository, operationRepository);
+        cardTransfer = new CardTransfer(
+                "1158445885584747",
+                "08/23",
+                "351",
+                "1158445885585555",
+                new Amount(BigDecimal.valueOf(50000), "RUR")
+        );
     }
 
     @SneakyThrows
     @Test
-    void transferMoneyCardToCardTest() {
-        CardTransfer cardTransfer = new CardTransfer(
-                "4558445885584747",
-                "08/23",
-                "351",
-                "4558445885585555",
-                new Amount(BigDecimal.valueOf(50000), "RUR")
-        );
+    void findByCardNumberAndAmountValueTest() {
         var actual = BigDecimal.valueOf(1111111);
         BigDecimal error = new BigDecimal("0.0005");
-        var result = cardRepository.findByCardNumberAndAmountValue(cardTransfer.getCardToNumber()).get();
-//        MatcherAssert.assertThat(result).extracting(Card::getAmount).extracting(Amount::getValue).compareTo(BigDecimal.valueOf(1111111));
-        MatcherAssert.assertThat(actual, Matchers.is(Matchers.not(Matchers.closeTo(result, error))));
-
-
+        var result = cardRepository.findByCardNumberAndAmountValue(cardTransfer.getCardFromNumber()).get();
+        MatcherAssert.assertThat(actual, is((closeTo(result, error))));
     }
 
 //
