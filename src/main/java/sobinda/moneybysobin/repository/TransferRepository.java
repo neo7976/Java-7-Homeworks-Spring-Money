@@ -77,8 +77,11 @@ public class TransferRepository {
     }
 
     public boolean setBalanceCard(String cardNumber, BigDecimal bigDecimal) {
-        cardRepository.setBalanceCard(bigDecimal, cardNumber);
-        return findByCardNumberAndAmountValue(cardNumber).get().compareTo(bigDecimal) == 0;
+        if (bigDecimal.compareTo(BigDecimal.ZERO) >= 0) {
+            cardRepository.setBalanceCard(bigDecimal, cardNumber);
+            return findByCardNumberAndAmountValue(cardNumber).get().compareTo(bigDecimal) == 0;
+        }
+        return false;
     }
 
     public String saveOperationRepository(LogBuilder logBuilder) {

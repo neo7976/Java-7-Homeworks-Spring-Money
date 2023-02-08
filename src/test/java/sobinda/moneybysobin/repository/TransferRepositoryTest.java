@@ -1,39 +1,32 @@
 package sobinda.moneybysobin.repository;
 
 import lombok.SneakyThrows;
-import org.junit.jupiter.api.*;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
-import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.boot.test.autoconfigure.orm.jpa.TestEntityManager;
-import org.springframework.test.context.junit4.SpringRunner;
-import org.testcontainers.shaded.org.hamcrest.MatcherAssert;
-import org.testcontainers.shaded.org.hamcrest.Matchers;
-import sobinda.moneybysobin.exceptions.InvalidTransactionExceptions;
-import sobinda.moneybysobin.log.LogBuilder;
 import sobinda.moneybysobin.entity.Amount;
 import sobinda.moneybysobin.entity.Card;
-import sobinda.moneybysobin.entity.Operation;
+import sobinda.moneybysobin.exceptions.InvalidTransactionExceptions;
 import sobinda.moneybysobin.model.CardTransfer;
-import sobinda.moneybysobin.model.Verification;
 
 import java.math.BigDecimal;
-import java.util.List;
-import java.util.Map;
 import java.util.stream.Stream;
 
-import static org.testcontainers.shaded.org.hamcrest.MatcherAssert.*;
-import static org.testcontainers.shaded.org.hamcrest.Matchers.*;
+import static org.testcontainers.shaded.org.hamcrest.MatcherAssert.assertThat;
+import static org.testcontainers.shaded.org.hamcrest.Matchers.closeTo;
+import static org.testcontainers.shaded.org.hamcrest.Matchers.is;
 
 
 @AutoConfigureTestDatabase(replace = AutoConfigureTestDatabase.Replace.NONE)
 @DataJpaTest
 class TransferRepositoryTest {
-
     TransferRepository transferRepository;
     @Autowired
     TestEntityManager testEntityManager;
@@ -77,7 +70,6 @@ class TransferRepositoryTest {
         assertThat(actual, is((closeTo(result, error))));
     }
 
-
     @SneakyThrows
     @Test
     void findByCardNumberTest() {
@@ -105,8 +97,34 @@ class TransferRepositoryTest {
         Assertions.assertEquals("Одной из карт нет в базе данных", thrown.getMessage());
     }
 
-    void setBalanceCard() {
+    public static Stream<Arguments> setBalanceTrue() {
+        return Stream.of(
+                Arguments.of(card1.getCardNumber(), BigDecimal.valueOf(5000)),
+                Arguments.of(card1.getCardNumber(), BigDecimal.valueOf(0)),
+                Arguments.of(card2.getCardNumber(), BigDecimal.valueOf(5000)),
+                Arguments.of(card2.getCardNumber(), BigDecimal.valueOf(0))
+        );
+    }
 
+    @ParameterizedTest()
+    @MethodSource("setBalanceTrue")
+    void setBalanceCardTrueTest(String card, BigDecimal bigDecimal) {
+        var result = transferRepository.setBalanceCard(card, bigDecimal);
+        Assertions.assertTrue(result, "Получаем true, когда баланс изменился");
+    }
+
+    public static Stream<Arguments> setBalanceFalse() {
+        return Stream.of(
+                Arguments.of(card1.getCardNumber(), BigDecimal.valueOf(-5000)),
+                Arguments.of(card2.getCardNumber(), BigDecimal.valueOf(-5000))
+        );
+    }
+
+    @ParameterizedTest()
+    @MethodSource("setBalanceFalse")
+    void setBalanceCardFalseTest(String card, BigDecimal bigDecimal) {
+        var result = transferRepository.setBalanceCard(card, bigDecimal);
+        Assertions.assertFalse(result, "Получаем False, когда баланс не изменился");
     }
 
     public static Stream<Arguments> validCardToBase() {

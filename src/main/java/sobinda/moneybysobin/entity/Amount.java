@@ -5,6 +5,7 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import javax.persistence.*;
+import javax.validation.constraints.Min;
 import java.math.BigDecimal;
 
 
@@ -13,6 +14,7 @@ import java.math.BigDecimal;
 @Embeddable
 @Data
 public class Amount {
+    @Min(0)
     private BigDecimal value;
     @Column(length = 10)
     private String currency;
