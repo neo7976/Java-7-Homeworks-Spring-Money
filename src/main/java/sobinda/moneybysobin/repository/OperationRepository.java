@@ -15,12 +15,12 @@ import java.util.UUID;
 @Transactional
 public interface OperationRepository extends JpaRepository<Operation, Integer> {
 
-    @Query(value = "select o from Operation o where o.isConfirm=false")
+    @Query(value = "select o from Operation o where o.confirm=0")
     List<Operation> findAllByConfirm();
 
     Optional<Operation> findByIdAndSecretCode(Integer id, String secretCode);
 
     @Modifying
-    @Query(value = "update money_transfer.operation set operation.confirm = true where id=:id", nativeQuery = true)
-    void setConfirmTrue(@Param("id") int id);
+    @Query(value = "update money_transfer.operation set operation.confirm =:confirm where operation.id=:id", nativeQuery = true)
+    void setConfirmTrue(@Param("id") int id, @Param("confirm") int confirm);
 }

@@ -13,6 +13,7 @@ import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.boot.test.autoconfigure.orm.jpa.TestEntityManager;
 import sobinda.moneybysobin.entity.Amount;
 import sobinda.moneybysobin.entity.Card;
+import sobinda.moneybysobin.entity.Operation;
 import sobinda.moneybysobin.exceptions.InvalidTransactionExceptions;
 import sobinda.moneybysobin.model.CardTransfer;
 
@@ -37,6 +38,7 @@ class TransferRepositoryTest {
     private CardTransfer cardTransfer;
     private static Card card1;
     private static Card card2;
+    private static Operation operation;
 
     @BeforeEach
     void setUp() {
@@ -59,6 +61,16 @@ class TransferRepositoryTest {
                 "1158445885585555",
                 new Amount(BigDecimal.valueOf(50000), "RUR")
         );
+
+        operation = Operation.builder()
+                .cardFromNumber(cardTransfer.getCardFromNumber())
+                .cardToNumber(cardTransfer.getCardToNumber())
+                .commission(new Amount(BigDecimal.valueOf(5000), cardTransfer.getAmount().getCurrency()))
+                .amount(cardTransfer.getAmount())
+                .secretCode("0000")
+                .confirm(0)
+                .build();
+        this.testEntityManager.persistAndFlush(operation);
     }
 
     @SneakyThrows
@@ -141,6 +153,13 @@ class TransferRepositoryTest {
             transferRepository.validCardToBase(new Card(cardFromNumber, cardFromTill, cardFromCVV), cardToNumber);
         });
         Assertions.assertEquals("Ошибка в доступе к карте списания", thrown.getMessage());
+    }
+
+    @Test
+    void setOperationConfirmTest() {
+        var result = transferRepository.setOperationConfirm(operation.getId(), 1);
+
+        Assertions.assertTrue(result, "Ожидаем изменение confirm на true");
     }
 
 

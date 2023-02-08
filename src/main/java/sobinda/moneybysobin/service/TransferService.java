@@ -107,8 +107,8 @@ public class TransferService {
 //                }
 
                 //изменение операции на true
-                transferRepository.setOperationConfirm(operation.getId());
-                return "Успешная транзакция №" + verification.getOperationId();
+                if (!transferRepository.setOperationConfirm(operation.getId(), 1))
+                    throw new InvalidTransactionExceptions("Не получилось изменить статус операции");
             } else {
                 logBuilder.setResult("НЕДОСТАТОЧНО СРЕДСТВ ДЛЯ ОПЕРАЦИИ");
                 transferLog.log(logBuilder);
@@ -117,5 +117,6 @@ public class TransferService {
         } else {
             throw new InvalidTransactionExceptions("Такой операции нет");
         }
+        return "Успешная транзакция №" + verification.getOperationId();
     }
 }

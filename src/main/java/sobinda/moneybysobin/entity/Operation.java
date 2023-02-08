@@ -4,12 +4,13 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import org.hibernate.annotations.GenericGenerator;
+import net.bytebuddy.implementation.bind.annotation.Default;
 import sobinda.moneybysobin.log.LogBuilder;
 
 import javax.persistence.*;
+import javax.validation.constraints.Max;
+import javax.validation.constraints.Min;
 import java.util.Objects;
-import java.util.UUID;
 
 @Data
 @Entity
@@ -41,8 +42,9 @@ public class Operation {
     //Сделать генерацию кода, когда будет возможность отправить код и принять его через форму в front
     @Column(nullable = false)
     private String secretCode;
-    @Column(name = "confirm")
-    private boolean isConfirm;
+    @Max(1)
+    @Min(0)
+    private int confirm;
 
     public Operation(LogBuilder logBuilder) {
         this.cardFromNumber = logBuilder.getCardNumberFrom();
@@ -51,15 +53,20 @@ public class Operation {
         this.commission = logBuilder.getCommission();
         //todo сейчас front создает только 0000, потом сделать генерацию
         this.secretCode = "0000";
+        this.confirm = 0;
     }
 
 
     @Override
     public String toString() {
-        return "cardFromNumber='" + cardFromNumber + '\'' +
+        return "Operation{" +
+                "id=" + id +
+                ", cardFromNumber='" + cardFromNumber + '\'' +
                 ", cardToNumber='" + cardToNumber + '\'' +
                 ", amount=" + amount +
                 ", commission=" + commission +
+                ", secretCode='" + secretCode + '\'' +
+                ", confirm=" + confirm +
                 '}';
     }
 

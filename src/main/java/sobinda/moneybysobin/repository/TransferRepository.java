@@ -1,7 +1,6 @@
 package sobinda.moneybysobin.repository;
 
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.domain.Example;
+import org.apache.catalina.valves.rewrite.InternalRewriteMap;
 import org.springframework.stereotype.Repository;
 import sobinda.moneybysobin.exceptions.InvalidTransactionExceptions;
 import sobinda.moneybysobin.entity.Amount;
@@ -12,7 +11,6 @@ import sobinda.moneybysobin.model.Verification;
 
 import java.math.BigDecimal;
 import java.util.*;
-import java.util.concurrent.atomic.AtomicInteger;
 
 @Repository
 public class TransferRepository {
@@ -95,7 +93,9 @@ public class TransferRepository {
         return String.valueOf(operationRepository.save(operation).getId());
     }
 
-    public void setOperationConfirm(int id) {
-        operationRepository.setConfirmTrue(id);
+    public boolean setOperationConfirm(int id, int confirm) {
+        operationRepository.setConfirmTrue(id, confirm);
+        System.out.println("РЕЗУЛЬТАТ: " + operationRepository.findById(id));
+        return operationRepository.findById(id).get().getConfirm() == 1;
     }
 }
