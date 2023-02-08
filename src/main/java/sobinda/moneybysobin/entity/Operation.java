@@ -42,9 +42,7 @@ public class Operation {
     //Сделать генерацию кода, когда будет возможность отправить код и принять его через форму в front
     @Column(nullable = false)
     private String secretCode;
-    @Max(1)
-    @Min(0)
-    private int confirm;
+    private boolean confirm;
 
     public Operation(LogBuilder logBuilder) {
         this.cardFromNumber = logBuilder.getCardNumberFrom();
@@ -53,7 +51,7 @@ public class Operation {
         this.commission = logBuilder.getCommission();
         //todo сейчас front создает только 0000, потом сделать генерацию
         this.secretCode = "0000";
-        this.confirm = 0;
+        this.confirm = false;
     }
 
 

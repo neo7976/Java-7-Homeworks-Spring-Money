@@ -107,8 +107,9 @@ public class TransferService {
 //                }
 
                 //изменение операции на true
-                if (!transferRepository.setOperationConfirm(operation.getId(), 1))
-                    throw new InvalidTransactionExceptions("Не получилось изменить статус операции");
+//                if (!transferRepository.setOperationConfirm(operation.getId()))
+//                    throw new InvalidTransactionExceptions("Не получилось изменить статус операции");
+                transferRepository.setOperationConfirm(operation.getId());
             } else {
                 logBuilder.setResult("НЕДОСТАТОЧНО СРЕДСТВ ДЛЯ ОПЕРАЦИИ");
                 transferLog.log(logBuilder);

@@ -93,9 +93,9 @@ public class TransferRepository {
         return String.valueOf(operationRepository.save(operation).getId());
     }
 
-    public boolean setOperationConfirm(int id, int confirm) {
-        operationRepository.setConfirmTrue(id, confirm);
-        System.out.println("РЕЗУЛЬТАТ: " + operationRepository.findById(id));
-        return operationRepository.findById(id).get().getConfirm() == 1;
+    public void setOperationConfirm(int id) {
+        operationRepository.setConfirmTrue(id);
+//        System.out.println("РЕЗУЛЬТАТ: " + operationRepository.findById(id));
+//        return operationRepository.findById(id).get().isConfirm();
     }
 }
