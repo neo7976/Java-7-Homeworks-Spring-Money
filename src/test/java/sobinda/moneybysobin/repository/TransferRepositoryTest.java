@@ -1,10 +1,7 @@
 package sobinda.moneybysobin.repository;
 
 import lombok.SneakyThrows;
-import org.junit.jupiter.api.AfterEach;
-import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.*;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
@@ -29,6 +26,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Stream;
 
+import static org.testcontainers.shaded.org.hamcrest.MatcherAssert.*;
 import static org.testcontainers.shaded.org.hamcrest.Matchers.*;
 
 
@@ -44,8 +42,8 @@ class TransferRepositoryTest {
     @Autowired
     OperationRepository operationRepository;
     private CardTransfer cardTransfer;
-    private Card card1;
-    private Card card2;
+    private static Card card1;
+    private static Card card2;
 
     @BeforeEach
     void setUp() {
@@ -76,7 +74,7 @@ class TransferRepositoryTest {
         var actual = BigDecimal.valueOf(1111111);
         BigDecimal error = new BigDecimal("0.0005");
         var result = cardRepository.findByCardNumberAndAmountValue(cardTransfer.getCardFromNumber()).get();
-        MatcherAssert.assertThat(actual, is((closeTo(result, error))));
+        assertThat(actual, is((closeTo(result, error))));
     }
 
 
@@ -85,9 +83,48 @@ class TransferRepositoryTest {
     void findByCardNumberTest() {
         var result1 = cardRepository.findByCardNumber(cardTransfer.getCardFromNumber()).get();
         var result2 = cardRepository.findByCardNumber(cardTransfer.getCardToNumber()).get();
-        MatcherAssert.assertThat(card1, is(result1));
-        MatcherAssert.assertThat(card2, is(result2));
+        assertThat(card1, is(result1));
+        assertThat(card2, is(result2));
     }
+
+    @SneakyThrows
+    @Test
+    void transferMoneyCardToCard() {
+        Card cardTest = Card.builder().cardNumber(cardTransfer.getCardFromNumber())
+                .cardCVV(cardTransfer.getCardFromCVV())
+                .cardValidTill(cardTransfer.getCardFromValidTill()).build();
+
+        transferRepository.transferMoneyCardToCard(cardTest, cardTransfer.getCardToNumber(), cardTransfer.getAmount());
+    }
+
+    @Test
+    void validCardToBaseTestFirst() {
+        InvalidTransactionExceptions thrown = Assertions.assertThrows(InvalidTransactionExceptions.class, () -> {
+            transferRepository.validCardToBase(card1, "4554444444444422");
+        });
+        Assertions.assertEquals("Одной из карт нет в базе данных", thrown.getMessage());
+    }
+
+    void setBalanceCard() {
+
+    }
+
+    public static Stream<Arguments> validCardToBase() {
+        return Stream.of(
+                Arguments.of(card1.getCardNumber(), "11/22", card1.getCardCVV(), card2.getCardNumber()),
+                Arguments.of(card1.getCardNumber(), card1.getCardValidTill(), "111", card2.getCardNumber())
+        );
+    }
+
+    @ParameterizedTest
+    @MethodSource("validCardToBase")
+    void validCardToBaseTestSecond(String cardFromNumber, String cardFromTill, String cardFromCVV, String cardToNumber) {
+        InvalidTransactionExceptions thrown = Assertions.assertThrows(InvalidTransactionExceptions.class, () -> {
+            transferRepository.validCardToBase(new Card(cardFromNumber, cardFromTill, cardFromCVV), cardToNumber);
+        });
+        Assertions.assertEquals("Ошибка в доступе к карте списания", thrown.getMessage());
+    }
+
 
 //
 //    public static Stream<Arguments> sourceTransfer() {
@@ -135,27 +172,5 @@ class TransferRepositoryTest {
 //    }
 //
 //
-//    @Test
-//    void validCardToBaseTestFirst() {
-//        InvalidTransactionExceptions thrown = Assertions.assertThrows(InvalidTransactionExceptions.class, () -> {
-//            transferRepository.validCardToBase(card1, "4554444444444422");
-//        });
-//        Assertions.assertEquals("Одной из карт нет в базе данных", thrown.getMessage());
-//    }
-//
-//    public static Stream<Arguments> validCardToBase() {
-//        return Stream.of(
-//                Arguments.of(card1.getCardNumber(), "11/22", card1.getCardCVV(), card2.getCardNumber()),
-//                Arguments.of(card1.getCardNumber(), card1.getCardValidTill(), "111", card2.getCardNumber())
-//        );
-//    }
-//
-//    @ParameterizedTest
-//    @MethodSource("validCardToBase")
-//    void validCardToBaseTestSecond(String cardFromNumber, String cardFromTill, String cardFromCVV, String cardToNumber) {
-//        InvalidTransactionExceptions thrown = Assertions.assertThrows(InvalidTransactionExceptions.class, () -> {
-//            transferRepository.validCardToBase(new Card(cardFromNumber, cardFromTill, cardFromCVV), cardToNumber);
-//        });
-//        Assertions.assertEquals("Ошибка в доступе к карте списания", thrown.getMessage());
-//    }
+
 }
