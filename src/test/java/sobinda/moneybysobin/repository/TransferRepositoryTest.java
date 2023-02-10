@@ -16,8 +16,10 @@ import sobinda.moneybysobin.entity.Card;
 import sobinda.moneybysobin.entity.Operation;
 import sobinda.moneybysobin.exceptions.InvalidTransactionExceptions;
 import sobinda.moneybysobin.model.CardTransfer;
+import sobinda.moneybysobin.model.Verification;
 
 import java.math.BigDecimal;
+import java.util.Collections;
 import java.util.stream.Stream;
 
 import static org.testcontainers.shaded.org.hamcrest.MatcherAssert.assertThat;
@@ -159,53 +161,11 @@ class TransferRepositoryTest {
 //        var result = transferRepository.setOperationConfirm(operation.getId());
 //        Assertions.assertTrue(result, "Ожидаем изменение confirm на true");
 //    }
-
-
 //
-//    public static Stream<Arguments> sourceTransfer() {
-//        return Stream.of(
-//                Arguments.of(card1,
-//                        card2.getCardNumber(),
-//                        new Amount(new BigDecimal(500_00), "RUR")),
-//                Arguments.of(card2,
-//                        card1.getCardNumber(),
-//                        new Amount(new BigDecimal(1000_00), "RUR"))
-//        );
-//    }
-//
-//    @ParameterizedTest
-//    @MethodSource("sourceTransfer")
-//    void transferMoneyCardToCardTest(Card cardFrom, String cardNumberTo, Amount amount) throws InvalidTransactionExceptions {
-//        Assertions.assertEquals("1",
-//                transferRepository.transferMoneyCardToCard(cardFrom, cardNumberTo, amount));
-//    }
-//
-//    public static Stream<Arguments> confirmOperation() {
-//        return Stream.of(
-//                Arguments.of(new LogBuilder().setOperationId("1")
-//                        .setAmount(new Amount(BigDecimal.valueOf(500_00), "RUR"))
-//                        .setCommission(new Amount(BigDecimal.valueOf(5_00), "RUR"))
-//                        .setCardNumberFrom("4558445885584747")
-//                        .setCardNumberTo("4558445885585555")
-//                ),
-//                Arguments.of(new LogBuilder().setOperationId("1")
-//                        .setAmount(new Amount(BigDecimal.valueOf(5_000_00), "RUR"))
-//                        .setCommission(new Amount(BigDecimal.valueOf(50_00), "RUR"))
-//                        .setCardNumberTo("4558445885584747")
-//                        .setCardNumberFrom("4558445885585555")
-//                )
-//        );
-//    }
-//
-//    @SneakyThrows
-//    @ParameterizedTest
-//    @MethodSource("confirmOperation")
-//    void confirmOperationTest(LogBuilder logBuilder) {
-//        transferRepository.saveOperationRepository(logBuilder);
-//        Assertions.assertEquals(List.of(new Operation(logBuilder)),
-//                transferRepository.confirmOperation(new Verification("0000", "1")));
-//    }
-//
-//
-
+    @SneakyThrows
+    @Test
+    void confirmOperationTest() {
+        var resultList = transferRepository.confirmOperation(new Verification("0000", String.valueOf(operation.getId())));
+        assertThat((resultList), is(Collections.singletonList(operation)));
+    }
 }
