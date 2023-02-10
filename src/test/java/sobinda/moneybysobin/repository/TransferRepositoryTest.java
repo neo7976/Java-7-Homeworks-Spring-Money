@@ -155,6 +155,7 @@ class TransferRepositoryTest {
         });
         Assertions.assertEquals("Ошибка в доступе к карте списания", thrown.getMessage());
     }
+
     // todo потом повторить
 //    @Test
 //    void setOperationConfirmTest() {
@@ -168,4 +169,14 @@ class TransferRepositoryTest {
         var resultList = transferRepository.confirmOperation(new Verification("0000", String.valueOf(operation.getId())));
         assertThat((resultList), is(Collections.singletonList(operation)));
     }
+
+    @SneakyThrows
+    @Test
+    void confirmOperationThrowTest() {
+        InvalidTransactionExceptions exceptions = Assertions.assertThrows(InvalidTransactionExceptions.class, () -> {
+            transferRepository.confirmOperation(new Verification("0001", String.valueOf(operation.getId())));
+        });
+        assertThat(exceptions.getMessage(), is("Ошибочка, такого мы не предвидели!"));
+    }
+
 }
