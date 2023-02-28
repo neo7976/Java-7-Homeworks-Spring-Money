@@ -1,6 +1,6 @@
 package sobinda.moneybysobin.repository;
 
-import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Repository;
 import sobinda.moneybysobin.entity.Amount;
 import sobinda.moneybysobin.entity.Card;
@@ -14,10 +14,9 @@ import java.util.List;
 import java.util.Optional;
 
 @Repository
+@Slf4j
 public class TransferRepository {
-
     private final CardRepository cardRepository;
-
     private final OperationRepository operationRepository;
 
     public TransferRepository(CardRepository cardRepository, OperationRepository operationRepository) {
@@ -54,20 +53,19 @@ public class TransferRepository {
 
     public List<Operation> confirmOperation(Verification verification) throws InvalidTransactionExceptions {
         //todo убрать null и переделать из списка просто в операцию, когда сможем получать id c front
-
         if (verification.getOperationId() == null) {
-            System.out.println("Сработала заглушка");
-            //todo заглушка, чтобы завершить все операции из-за бага на фронте
+            log.info("Сработала заглушка на null, возвращаем список всех операций");
             return operationRepository.findAllByConfirm();
+
         } else {
             var resultOperation = operationRepository.findByIdAndSecretCode(
                     Integer.valueOf(verification.getOperationId())
                     , verification.getCode());
             if (resultOperation.isPresent()) {
-                System.out.println("Найдена операция на очередь об оплате");
+                log.info("Найдена операция '{}' на оплату", resultOperation.get().getId());
                 return Collections.singletonList(resultOperation.get());
             }
-            //выбросить ошибку в сервисе или репозитории и удалить временные данные
+            //todo выбросить ошибку в сервисе или репозитории и удалить временные данные
             throw new InvalidTransactionExceptions("Ошибочка, такого мы не предвидели!");
         }
     }

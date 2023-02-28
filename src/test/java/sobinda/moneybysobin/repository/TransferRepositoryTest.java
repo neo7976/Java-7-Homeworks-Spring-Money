@@ -99,7 +99,8 @@ class TransferRepositoryTest {
                 .cardCVV(cardTransfer.getCardFromCVV())
                 .cardValidTill(cardTransfer.getCardFromValidTill()).build();
 
-        transferRepository.transferMoneyCardToCard(cardTest, cardTransfer.getCardToNumber(), cardTransfer.getAmount());
+        var result = transferRepository.transferMoneyCardToCard(cardTest, cardTransfer.getCardToNumber(), cardTransfer.getAmount());
+        Assertions.assertTrue(result);
     }
 
     @Test
