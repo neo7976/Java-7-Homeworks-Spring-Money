@@ -6,6 +6,7 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import javax.persistence.*;
+import java.math.BigDecimal;
 import java.util.Objects;
 
 @Data
@@ -45,5 +46,9 @@ public class Operation {
     @Override
     public int hashCode() {
         return Objects.hash(cardFromNumber, cardToNumber, amount, commission, secretCode);
+    }
+
+    public static BigDecimal sumAmountAndCommission(Amount amount, Amount commission) {
+        return amount.getValue().add(commission.getValue());
     }
 }

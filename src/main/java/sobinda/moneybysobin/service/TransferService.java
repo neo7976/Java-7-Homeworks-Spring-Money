@@ -21,7 +21,7 @@ import java.util.List;
 public class TransferService {
     private final TransferRepository transferRepository;
     //1%
-    private final int COMMISSION = 100;
+    private final BigDecimal COMMISSION = BigDecimal.valueOf(100);
     private final String SECRET_CODE = "0000";
 
 
@@ -34,8 +34,11 @@ public class TransferService {
         );
 
         String cardToNumber = cardTransfer.getCardToNumber();
-        Amount amount = new Amount(cardTransfer.getAmount().getValue(),
+
+        Amount amount = new Amount(
+                cardTransfer.getAmount().getValue(),
                 cardTransfer.getAmount().getCurrency());
+
         if (cardFrom.getCardNumber().equals(cardToNumber)) {
             throw new InvalidTransactionExceptions("Карта для перевода и получения совпадает!\n" +
                     "Проверьте входные данные ещё раз");
@@ -45,8 +48,9 @@ public class TransferService {
         }
 
         var balanceFrom = transferRepository.findByCardNumberAndAmountValue(cardFrom.getCardNumber()).get();
-        Amount commission = new Amount(amount.getValue().divide(BigDecimal.valueOf(COMMISSION)), amount.getCurrency());
-        BigDecimal sumResult = commission.getValue().add(amount.getValue());
+        Amount commission = Amount.addCommission(amount, COMMISSION);
+
+        BigDecimal sumResult = Operation.sumAmountAndCommission(amount, commission);
 
         Operation operation = Operation.builder()
                 .cardFromNumber(cardFrom.getCardNumber())
@@ -80,7 +84,11 @@ public class TransferService {
         if (verification.getCode().equals(operation.getSecretCode())) {
             log.info("СЕКРЕТНЫЙ КОД ДЛЯ ОПЕРАЦИИ {} СОВПАДАЕТ", operation.getId());
             BigDecimal balanceFrom = transferRepository.findByCardNumberAndAmountValue(operation.getCardFromNumber()).get();
-            BigDecimal sumResult = operation.getCommission().getValue().add(operation.getAmount().getValue());
+
+            BigDecimal sumResult = Operation.sumAmountAndCommission(
+                    operation.getAmount(),
+                    operation.getCommission()
+            );
 
             if (balanceFrom.compareTo(sumResult) >= 0) {
                 transferRepository.setBalanceCard(operation.getCardFromNumber(), balanceFrom.subtract(sumResult));
@@ -90,7 +98,6 @@ public class TransferService {
                 log.info(String.format("ТРАНЗАКЦИЯ ПРОШЛА УСПЕШНО! ВАШ БАЛАНС СОСТАВЛЯЕТ: %.2f %s",
                         transferRepository.findByCardNumberAndAmountValue(operation.getCardFromNumber()).get().divide(new BigDecimal(100)),
                         operation.getAmount().getCurrency()));
-
 
                 //todo удалить заглушку и сделать для всех операций удаление, когда будем получать с front id операции
 //                if (verification.getOperationId() != null) {

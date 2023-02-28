@@ -8,7 +8,6 @@ import javax.persistence.*;
 import javax.validation.constraints.Min;
 import java.math.BigDecimal;
 
-
 @AllArgsConstructor
 @NoArgsConstructor
 @Embeddable
@@ -22,6 +21,15 @@ public class Amount {
     @Override
     public String toString() {
         return String.format("[%.2f %s]", value, currency);
+    }
+
+    public static Amount addCommission(Amount amount, BigDecimal commissionPercentage) {
+        if (commissionPercentage.compareTo(BigDecimal.ZERO) == 0) {
+            return new Amount(amount.getValue(), amount.getCurrency());
+        }
+        return new Amount(
+                amount.getValue().divide(commissionPercentage),
+                amount.getCurrency());
     }
 }
 
