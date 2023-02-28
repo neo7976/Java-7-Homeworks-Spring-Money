@@ -40,7 +40,9 @@ public class TransferService {
             throw new InvalidTransactionExceptions("Карта для перевода и получения совпадает!\n" +
                     "Проверьте входные данные ещё раз");
         }
-        System.out.println(transferRepository.transferMoneyCardToCard(cardFrom, cardToNumber, amount));
+        if (transferRepository.transferMoneyCardToCard(cardFrom, cardToNumber, amount)) {
+            log.info("Карты для перевода и получения найдены в БД");
+        }
 
         var balanceFrom = transferRepository.findByCardNumberAndAmountValue(cardFrom.getCardNumber()).get();
         Amount commission = new Amount(amount.getValue().divide(BigDecimal.valueOf(COMMISSION)), amount.getCurrency());
@@ -53,6 +55,7 @@ public class TransferService {
                 .commission(commission)
                 .secretCode(SECRET_CODE)
                 .build();
+
         if (balanceFrom.compareTo(sumResult) >= 0) {
             String operationId = transferRepository.saveOperationRepository(operation);
             log.info("Запрос на перевод с карты: {}", operation.getCardFromNumber());
@@ -78,25 +81,17 @@ public class TransferService {
             System.out.println("СЕКРЕТНЫЙ КОД СОВПАДАЕТ");
             BigDecimal balanceFrom = transferRepository.findByCardNumberAndAmountValue(operation.getCardFromNumber()).get();
             BigDecimal sumResult = operation.getCommission().getValue().add(operation.getAmount().getValue());
-            LogBuilder logBuilder = new LogBuilder()
-                    .setOperationId(String.valueOf(operation.getId()))
-                    .setCardNumberFrom(operation.getCardFromNumber())
-                    .setCardNumberTo(operation.getCardToNumber())
-                    .setAmount(operation.getAmount())
-                    .setCommission(operation.getCommission());
 
             if (balanceFrom.compareTo(sumResult) >= 0) {
-                //устанавливаем новый баланс на нашу исходную карту
                 transferRepository.setBalanceCard(operation.getCardFromNumber(), balanceFrom.subtract(sumResult));
                 BigDecimal balanceTo = transferRepository.findByCardNumberAndAmountValue(operation.getCardToNumber()).get();
 
-                //устанавливаем новый баланс на карту перевода
                 transferRepository.setBalanceCard(operation.getCardToNumber(), balanceTo.add(operation.getAmount().getValue()));
-                logBuilder.setResult(String.format("ТРАНЗАКЦИЯ ПРОШЛА УСПЕШНО! ВАШ БАЛАНС СОСТАВЛЯЕТ: %.2f %s",
+                log.info(String.format("ТРАНЗАКЦИЯ ПРОШЛА УСПЕШНО! ВАШ БАЛАНС СОСТАВЛЯЕТ: %.2f %s",
                         transferRepository.findByCardNumberAndAmountValue(operation.getCardFromNumber()).get().divide(new BigDecimal(100)),
                         operation.getAmount().getCurrency()));
 
-                transferLog.log(logBuilder);
+
                 //todo удалить заглушку и сделать для всех операций удаление, когда будем получать с front id операции
 //                if (verification.getOperationId() != null) {
 //                    transferRepository.deleteWaitOperation(verification.getOperationId());
@@ -107,13 +102,12 @@ public class TransferService {
 //                    throw new InvalidTransactionExceptions("Не получилось изменить статус операции");
                 transferRepository.setOperationConfirm(operation.getId());
             } else {
-                logBuilder.setResult("НЕДОСТАТОЧНО СРЕДСТВ ДЛЯ ОПЕРАЦИИ");
-                transferLog.log(logBuilder);
-                throw new InvalidTransactionExceptions(logBuilder.getResult());
+                log.info("НЕДОСТАТОЧНО СРЕДСТВ ДЛЯ ОПЕРАЦИИ c карты: {}", operation.getCardFromNumber());
+                throw new InvalidTransactionExceptions("НЕДОСТАТОЧНО СРЕДСТВ ДЛЯ ОПЕРАЦИИ");
             }
         } else {
             throw new InvalidTransactionExceptions("Такой операции нет");
         }
-        return "Успешная транзакция №" + verification.getOperationId();
+        return verification.getOperationId();
     }
 }

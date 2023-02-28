@@ -1,5 +1,6 @@
 package sobinda.moneybysobin.repository;
 
+import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Repository;
 import sobinda.moneybysobin.entity.Amount;
 import sobinda.moneybysobin.entity.Card;
@@ -24,14 +25,14 @@ public class TransferRepository {
         this.operationRepository = operationRepository;
     }
 
-    public String transferMoneyCardToCard(Card cardFrom, String cardNumberTo, Amount amount) throws InvalidTransactionExceptions {
+    public boolean transferMoneyCardToCard(Card cardFrom, String cardNumberTo, Amount amount) throws InvalidTransactionExceptions {
         //проверяем на наличие карт в базе, валюты на карте
-        validCardToBase(cardFrom, cardNumberTo);
-        validCurrencyCardTo(cardNumberTo, amount);
-        return "Карты имеются в базе данных";
+        boolean validFirst = validCardToBase(cardFrom, cardNumberTo);
+        boolean validSecond = validCurrencyCardTo(cardNumberTo, amount);
+        return validFirst && validSecond;
     }
 
-    public void validCardToBase(Card cardFrom, String cardNumberTo) throws InvalidTransactionExceptions {
+    public boolean validCardToBase(Card cardFrom, String cardNumberTo) throws InvalidTransactionExceptions {
 
         if (cardRepository.findByCardNumber(cardNumberTo).isEmpty() || cardRepository.findByCardNumber(cardFrom.getCardNumber()).isEmpty()) {
             throw new InvalidTransactionExceptions("Одной из карт нет в базе данных");
@@ -39,15 +40,16 @@ public class TransferRepository {
         if (!cardRepository.findByCardNumber(cardFrom.getCardNumber()).get().equals(cardFrom)) {
             throw new InvalidTransactionExceptions("Ошибка в доступе к карте списания");
         }
+        return true;
     }
 
-    public void validCurrencyCardTo(String cardNumberTo, Amount amount) throws InvalidTransactionExceptions {
-
+    public boolean validCurrencyCardTo(String cardNumberTo, Amount amount) throws InvalidTransactionExceptions {
         if (cardRepository.findByCardNumberAndCurrency(cardNumberTo, amount.getCurrency()).isEmpty()) {
             throw new InvalidTransactionExceptions(String.format("Карта %s не имеет валютный счёт [%s] для перевода\n",
                     cardNumberTo,
                     amount.getCurrency()));
         }
+        return true;
     }
 
     public List<Operation> confirmOperation(Verification verification) throws InvalidTransactionExceptions {

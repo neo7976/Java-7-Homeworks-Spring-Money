@@ -6,7 +6,6 @@ import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Mockito;
@@ -14,22 +13,18 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.testcontainers.shaded.org.hamcrest.MatcherAssert;
 import org.testcontainers.shaded.org.hamcrest.Matchers;
 import sobinda.moneybysobin.entity.Amount;
-import sobinda.moneybysobin.entity.Card;
 import sobinda.moneybysobin.entity.Operation;
-import sobinda.moneybysobin.log.LogBuilder;
-import sobinda.moneybysobin.log.TransferLog;
 import sobinda.moneybysobin.model.CardTransfer;
 import sobinda.moneybysobin.model.Verification;
 import sobinda.moneybysobin.repository.TransferRepository;
 
 import java.math.BigDecimal;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.Optional;
 
-import static org.junit.jupiter.api.Assertions.*;
-import static org.mockito.Mockito.*;
+import static org.mockito.Mockito.any;
+import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
 class TransferServiceTest {
@@ -72,7 +67,7 @@ class TransferServiceTest {
     @Test
     void transferMoneyCardToCard() {
         when(transferRepository.transferMoneyCardToCard(any(), any(), any()))
-                .thenReturn("Карты имеются в базе");
+                .thenReturn(true);
         when(transferRepository.findByCardNumberAndAmountValue(any()))
                 .thenReturn(Optional.of(new BigDecimal(5000_00)));
         when(transferRepository.saveOperationRepository(any(Operation.class)))
