@@ -37,9 +37,6 @@ class TransferServiceTest {
     @Mock
     TransferRepository transferRepository;
 
-    @Mock
-    TransferLog transferLog;
-
     @InjectMocks
     TransferService transferService;
     private final String ID = "1";
@@ -78,7 +75,7 @@ class TransferServiceTest {
                 .thenReturn("Карты имеются в базе");
         when(transferRepository.findByCardNumberAndAmountValue(any()))
                 .thenReturn(Optional.of(new BigDecimal(5000_00)));
-        when(transferRepository.saveOperationRepository(any(LogBuilder.class)))
+        when(transferRepository.saveOperationRepository(any(Operation.class)))
                 .thenReturn(ID);
         var result = transferService.transferMoneyCardToCard(cardTransfer);
         MatcherAssert.assertThat(result, Matchers.is(("Ожидаем подтверждение на перевод операции №") + ID));

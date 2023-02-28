@@ -1,16 +1,16 @@
 package sobinda.moneybysobin.repository;
 
-import org.apache.catalina.valves.rewrite.InternalRewriteMap;
 import org.springframework.stereotype.Repository;
-import sobinda.moneybysobin.exceptions.InvalidTransactionExceptions;
 import sobinda.moneybysobin.entity.Amount;
 import sobinda.moneybysobin.entity.Card;
 import sobinda.moneybysobin.entity.Operation;
-import sobinda.moneybysobin.log.LogBuilder;
+import sobinda.moneybysobin.exceptions.InvalidTransactionExceptions;
 import sobinda.moneybysobin.model.Verification;
 
 import java.math.BigDecimal;
-import java.util.*;
+import java.util.Collections;
+import java.util.List;
+import java.util.Optional;
 
 @Repository
 public class TransferRepository {
@@ -82,14 +82,7 @@ public class TransferRepository {
         return false;
     }
 
-    public String saveOperationRepository(LogBuilder logBuilder) {
-        Operation operation = Operation.builder()
-                .cardFromNumber(logBuilder.getCardNumberFrom())
-                .cardToNumber(logBuilder.getCardNumberTo())
-                .commission(logBuilder.getCommission())
-                .amount(logBuilder.getAmount())
-                .secretCode("0000")
-                .build();
+    public String saveOperationRepository(Operation operation) {
         return String.valueOf(operationRepository.save(operation).getId());
     }
 

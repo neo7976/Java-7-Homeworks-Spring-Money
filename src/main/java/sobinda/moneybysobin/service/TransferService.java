@@ -1,12 +1,13 @@
 package sobinda.moneybysobin.service;
 
+import lombok.AllArgsConstructor;
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import sobinda.moneybysobin.entity.Amount;
 import sobinda.moneybysobin.entity.Card;
 import sobinda.moneybysobin.entity.Operation;
 import sobinda.moneybysobin.exceptions.InvalidTransactionExceptions;
-import sobinda.moneybysobin.log.LogBuilder;
-import sobinda.moneybysobin.log.TransferLog;
 import sobinda.moneybysobin.model.*;
 import sobinda.moneybysobin.repository.TransferRepository;
 
@@ -15,17 +16,13 @@ import java.math.BigDecimal;
 import java.util.List;
 
 @Service
+@Slf4j
+@RequiredArgsConstructor
 public class TransferService {
     private final TransferRepository transferRepository;
     //1%
     private final int COMMISSION = 100;
     private final String SECRET_CODE = "0000";
-    private final TransferLog transferLog;
-
-    public TransferService(TransferRepository transferRepository) {
-        this.transferRepository = transferRepository;
-        this.transferLog = TransferLog.getInstance();
-    }
 
 
     @Transactional
@@ -49,21 +46,20 @@ public class TransferService {
         Amount commission = new Amount(amount.getValue().divide(BigDecimal.valueOf(COMMISSION)), amount.getCurrency());
         BigDecimal sumResult = commission.getValue().add(amount.getValue());
 
-        // пишем проверку баланса и перевод денег
-        LogBuilder logBuilder = new LogBuilder()
-                .setCardNumberFrom(cardFrom.getCardNumber())
-                .setCardNumberTo(cardToNumber)
-                .setAmount(amount)
-                .setCommission(commission);
+        Operation operation = Operation.builder()
+                .cardFromNumber(cardFrom.getCardNumber())
+                .cardToNumber(cardToNumber)
+                .amount(amount)
+                .commission(commission)
+                .secretCode(SECRET_CODE)
+                .build();
         if (balanceFrom.compareTo(sumResult) >= 0) {
-            String operationId = transferRepository.saveOperationRepository(logBuilder);
-            logBuilder.setResult("ЗАПРОС НА ПЕРЕВОД")
-                    .setOperationId(operationId);
-            transferLog.log(logBuilder);
-            return "Ожидаем подтверждение на перевод операции №" + operationId;
+            String operationId = transferRepository.saveOperationRepository(operation);
+            log.info("Запрос на перевод с карты: {}", operation.getCardFromNumber());
+            return operationId;
         } else {
-            logBuilder.setResult("НЕДОСТАТОЧНО СРЕДСТВ ДЛЯ ОПЕРАЦИИ");
-            throw new InvalidTransactionExceptions(logBuilder.getResult());
+            log.info("Перевод отклонен с карты: {}", operation.getCardFromNumber());
+            throw new InvalidTransactionExceptions("Недостаточно средств для списания денежных средств");
         }
     }
 
