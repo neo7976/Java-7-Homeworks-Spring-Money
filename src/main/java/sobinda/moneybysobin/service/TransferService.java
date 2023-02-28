@@ -78,7 +78,7 @@ public class TransferService {
 
     private String operationWithMoney(Verification verification, Operation operation) throws InvalidTransactionExceptions {
         if (verification.getCode().equals(operation.getSecretCode())) {
-            System.out.println("СЕКРЕТНЫЙ КОД СОВПАДАЕТ");
+            log.info("СЕКРЕТНЫЙ КОД ДЛЯ ОПЕРАЦИИ {} СОВПАДАЕТ", operation.getId());
             BigDecimal balanceFrom = transferRepository.findByCardNumberAndAmountValue(operation.getCardFromNumber()).get();
             BigDecimal sumResult = operation.getCommission().getValue().add(operation.getAmount().getValue());
 
@@ -108,6 +108,6 @@ public class TransferService {
         } else {
             throw new InvalidTransactionExceptions("Такой операции нет");
         }
-        return verification.getOperationId();
+        return String.valueOf(operation.getId());
     }
 }

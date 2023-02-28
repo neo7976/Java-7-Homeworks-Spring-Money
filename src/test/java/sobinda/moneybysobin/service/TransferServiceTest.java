@@ -50,6 +50,7 @@ class TransferServiceTest {
                 new Amount(BigDecimal.valueOf(50000), "RUR"));
 
         operation = Operation.builder()
+                .id(Integer.valueOf(ID))
                 .cardFromNumber(cardTransfer.getCardFromNumber())
                 .cardToNumber(cardTransfer.getCardToNumber())
                 .commission(new Amount(BigDecimal.valueOf(5000), cardTransfer.getAmount().getCurrency()))
@@ -73,7 +74,7 @@ class TransferServiceTest {
         when(transferRepository.saveOperationRepository(any(Operation.class)))
                 .thenReturn(ID);
         var result = transferService.transferMoneyCardToCard(cardTransfer);
-        MatcherAssert.assertThat(result, Matchers.is(("Ожидаем подтверждение на перевод операции №") + ID));
+        MatcherAssert.assertThat(result, Matchers.is(ID));
     }
 
     @SneakyThrows
@@ -86,6 +87,6 @@ class TransferServiceTest {
         when(transferRepository.setBalanceCard(Mockito.any(), Mockito.any(BigDecimal.class)))
                 .thenReturn(true);
         var result = transferService.confirmOperation(new Verification("0000", ID));
-        Assertions.assertEquals("Успешная транзакция №" + ID, result);
+        Assertions.assertEquals(ID, result);
     }
 }
