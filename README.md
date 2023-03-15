@@ -14,7 +14,7 @@
 - Front не обрабатывает получаемые backend id запросов, поэтому стоит заглушка на `null` и проведение всех операций в очереди `(в тестах проблем не возникает и все работает корректно)`;
 - Данные по картам обрабатываются, ждут подтверждения оплаты и хранятся в [репозитории](/src/main/java/sobinda/moneybysobin/repository);
 - Присутствует логирование с записью в [файл](/src/main/java/sobinda/moneybysobin/log);
-- Обработка [исключений](/src/main/java/sobinda/moneybysobin\advice);
+- Обработка [исключений](/src/main/java/sobinda/moneybysobin/advice);
 - Настройка доступа с fronted к нашему [серверу](/src/main/java/sobinda/moneybysobin/config);
 - Наши модели, для получения POST запросов, обработка [->](/src/main/java/sobinda/moneybysobin/model);
 - Контроллер [TransferController.java](/src/main/java/sobinda/moneybysobin/controller);
